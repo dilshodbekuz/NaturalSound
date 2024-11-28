@@ -1,8 +1,7 @@
-package com.example.naturalsound
+package com.example.naturalsound.sound_play
 
 import android.content.Context
 import android.media.MediaPlayer
-import android.util.Log
 import com.example.naturalsound.MainViewModel.SoundState
 
 class PlayerImpl : Player {

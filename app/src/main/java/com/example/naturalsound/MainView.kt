@@ -1,6 +1,5 @@
 package com.example.naturalsound
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -36,8 +35,7 @@ import com.example.naturalsound.ui.theme.AppColors
 import com.example.naturalsound.ui.theme.NaturalSoundTheme
 
 @Composable
-fun MainView() {
-    val viewModel: MainViewModel = viewModel()
+fun MainView(viewModel: MainViewModel) {
     NaturalSoundTheme {
         Scaffold(
             modifier = Modifier

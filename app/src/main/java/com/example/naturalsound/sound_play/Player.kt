@@ -1,4 +1,4 @@
-package com.example.naturalsound
+package com.example.naturalsound.sound_play
 
 import android.content.Context
 import com.example.naturalsound.MainViewModel.SoundState

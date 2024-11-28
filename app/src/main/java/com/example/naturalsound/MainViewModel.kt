@@ -2,9 +2,9 @@ package com.example.naturalsound
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.media.MediaPlayer
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import com.example.naturalsound.sound_play.Player
+import com.example.naturalsound.sound_play.PlayerImpl
 
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
