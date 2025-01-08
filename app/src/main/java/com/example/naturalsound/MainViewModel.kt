@@ -2,9 +2,11 @@ package com.example.naturalsound
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Context
 import android.media.MediaPlayer
 import android.media.SoundPool
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import com.example.naturalsound.sound_play.Player
 import com.example.naturalsound.sound_play.PlayerImpl
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,19 +14,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
+class MainViewModel : ViewModel() {
 
     private val player: Player by lazy { PlayerImpl() }
-
-    @SuppressLint("StaticFieldLeak")
-    private val context = application.applicationContext
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
     private var mediaPlayerList = HashMap<Int, MediaPlayer>()
-    val selectList = mutableListOf<SoundState?>()
-
-
 
     val sounds = listOf(
         SoundState(1, "Rain", R.raw.rain),
@@ -36,21 +32,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         SoundState(7, "Drip", R.raw.drip),
         SoundState(8, "Storm", R.raw.storm)
     )
-    val animalsSound = listOf(
-        SoundState(100, "Cat", R.raw.cat),
-        SoundState(100, "Caw", R.raw.caw),
-        SoundState(100, "Dog", R.raw.dog),
-        SoundState(100, "Donkey", R.raw.donkey),
-        SoundState(100, "Dogs", R.raw.dogs),
-        SoundState(100, "Geese", R.raw.geese),
-        SoundState(100, "Horse", R.raw.horse),
-        SoundState(100, "Lion", R.raw.lion),
-        SoundState(100, "Rooster", R.raw.rooster),
-        SoundState(100, "Run horse", R.raw.run_horse),
-        SoundState(100, "Wolf", R.raw.wolf),
-    )
 
-    fun playSound(item: SoundState?) {
+    fun playSound(context: Context, item: SoundState?) {
+        val selectList = mutableListOf<SoundState?>()
         selectList.addAll(uiState.value.selectList)
         selectList.add(item)
         _uiState.update { it.copy(selectList = selectList) }
@@ -63,6 +47,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun stopSound(item: SoundState?) {
+        val selectList = mutableListOf<SoundState?>()
         selectList.addAll(uiState.value.selectList)
         selectList.remove(item)
         _uiState.update { it.copy(selectList = selectList) }

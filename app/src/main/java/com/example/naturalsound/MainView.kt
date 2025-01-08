@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,6 +41,7 @@ import com.example.naturalsound.ui.theme.NaturalSoundTheme
 @Composable
 fun MainView(viewModel: MainViewModel) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
     NaturalSoundTheme {
         Scaffold(
             modifier = Modifier
@@ -63,23 +65,12 @@ fun MainView(viewModel: MainViewModel) {
                             onClick = {
                                 if (uiState.selectList.contains(item)) {
                                     viewModel.stopSound(item)
-                                } else viewModel.playSound(item)
+                                } else viewModel.playSound(context,item)
                             },
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
-                    if (viewModel.sounds.size % 2 != 0) item { }
-                    item { Text16spBold("Animals") }
-                    item {}
-                    items(viewModel.animalsSound) { item ->
-                        SoundItem(
-                            value = item.value,
-                            isPlayer = false,
-                            onClick = { viewModel.playSound(item) },
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                }
+                 }
             }
         )
     }
