@@ -1,5 +1,6 @@
 package com.example.naturalsound
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +39,7 @@ import com.example.naturalsound.ui.theme.NaturalSoundTheme
 
 @Composable
 fun MainView(viewModel: MainViewModel) {
+    val uiState by viewModel.uiState.collectAsState()
     NaturalSoundTheme {
         Scaffold(
             modifier = Modifier
@@ -55,9 +59,11 @@ fun MainView(viewModel: MainViewModel) {
                     items(viewModel.sounds) { item ->
                         SoundItem(
                             value = item.value,
-                            isPlayer = viewModel.selectList.contains(item),
+                            isPlayer = uiState.selectList.contains(item),
                             onClick = {
-                                viewModel.playSound(item)
+                                if (uiState.selectList.contains(item)) {
+                                    viewModel.stopSound(item)
+                                } else viewModel.playSound(item)
                             },
                         )
                         Spacer(modifier = Modifier.height(8.dp))

@@ -1,10 +1,11 @@
 package com.example.naturalsound.sound_play
 
 import android.content.Context
-import com.example.naturalsound.MainViewModel.SoundState
+import android.media.MediaPlayer
+import com.example.naturalsound.SoundState
 
 interface Player {
-    fun playSound(context: Context, sounds: List<SoundState?>)
-    fun stopSound(context: Context, music: Int?)
+    fun playSound(mediaPlayer: MediaPlayer)
+    fun stopSound(mediaPlayer: MediaPlayer)
     fun resetSound()
 }

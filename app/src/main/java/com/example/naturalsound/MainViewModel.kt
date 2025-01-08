@@ -2,9 +2,14 @@ package com.example.naturalsound
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.media.MediaPlayer
+import android.media.SoundPool
 import androidx.lifecycle.AndroidViewModel
 import com.example.naturalsound.sound_play.Player
 import com.example.naturalsound.sound_play.PlayerImpl
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -13,7 +18,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     @SuppressLint("StaticFieldLeak")
     private val context = application.applicationContext
-    val selectList: MutableList<SoundState?> = mutableListOf()
+
+    private val _uiState = MutableStateFlow(UiState())
+    val uiState = _uiState.asStateFlow()
+    private var mediaPlayerList = HashMap<Int, MediaPlayer>()
+    val selectList = mutableListOf<SoundState?>()
+
 
 
     val sounds = listOf(
@@ -41,17 +51,32 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     )
 
     fun playSound(item: SoundState?) {
+        selectList.addAll(uiState.value.selectList)
         selectList.add(item)
-        player.playSound(context, selectList)
+        _uiState.update { it.copy(selectList = selectList) }
+        val mediaPlayer = MediaPlayer.create(context, item?.sound ?: 0).apply {
+            isLooping = true
+            start()
+        }
+        player.playSound(mediaPlayer = mediaPlayer)
+        mediaPlayerList[item!!.id!!] = mediaPlayer
+    }
+
+    fun stopSound(item: SoundState?) {
+        selectList.addAll(uiState.value.selectList)
+        selectList.remove(item)
+        _uiState.update { it.copy(selectList = selectList) }
+        val mediaPlayer = mediaPlayerList[item?.id!!]
+        mediaPlayer?.stop()
+        player.stopSound(mediaPlayer!!)
     }
 
     fun resetSound() {
+        _uiState.update { it.copy(selectList = mutableListOf()) }
         player.resetSound()
     }
-
-    data class SoundState(
-        val id: Int? = null,
-        val value: String = "",
-        val sound: Int? = null
-    )
 }
+
+data class UiState(
+    val selectList: MutableList<SoundState?> = mutableListOf(),
+)
