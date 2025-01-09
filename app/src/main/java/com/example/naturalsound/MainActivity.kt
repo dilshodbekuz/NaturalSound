@@ -28,13 +28,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val viewModel: MainViewModel = viewModel()
-            val context = LocalContext.current
-//            LaunchedEffect(viewModel.selectList.isEmpty()) {
-//                val serviceIntent = Intent(context, MyForegroundService::class.java)
-//                context.stopService(serviceIntent)
-//            }
             MainView(viewModel)
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val serviceIntent = Intent(this, MyForegroundService::class.java)
+        stopService(serviceIntent)
     }
 
     override fun onStop() {
@@ -43,16 +44,17 @@ class MainActivity : ComponentActivity() {
         ContextCompat.startForegroundService(this, serviceIntent)
     }
 
-    override fun onPause() {
-        super.onPause()
-        val serviceIntent = Intent(this, MyForegroundService::class.java)
-        ContextCompat.startForegroundService(this, serviceIntent)
-    }
 
+    //    override fun onPause() {
+//        super.onPause()
+//        val serviceIntent = Intent(this, MyForegroundService::class.java)
+//        ContextCompat.startForegroundService(this, serviceIntent)
+//    }
+//
     override fun onDestroy() {
         super.onDestroy()
         val serviceIntent = Intent(this, MyForegroundService::class.java)
-        this.stopService(serviceIntent)
+        stopService(serviceIntent)
     }
 }
 

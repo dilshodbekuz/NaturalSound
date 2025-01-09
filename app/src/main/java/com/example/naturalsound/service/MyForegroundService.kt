@@ -12,10 +12,13 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import com.example.naturalsound.MainActivity
 import com.example.naturalsound.R
 
-class MyForegroundService : Service() {
+class MyForegroundService : Service(),LifecycleObserver {
 
     private val SERVICE_ID = 1
     private val CHANNEL_ID = "my_foreground_service_channel"
@@ -36,8 +39,6 @@ class MyForegroundService : Service() {
 
     @SuppressLint("ForegroundServiceType")
     private fun startForegroundService() {
-        Log.d("aaa", "startForegroundService")
-        // Create Notification Channel (required for Android 8.0+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
@@ -48,10 +49,6 @@ class MyForegroundService : Service() {
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
-//        val serviceIntent = Intent(this, MyForegroundService::class.java)
-//        this.stopService(serviceIntent)
-
-        // Build the Notification
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setShowWhen(true)
             .setAutoCancel(true)
@@ -68,8 +65,11 @@ class MyForegroundService : Service() {
                 )
             )
             .build()
-
-        // Start the service in the foreground
         startForeground(SERVICE_ID, notification)
+    }
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    fun onAppPaused() {
+        // Stop the foreground service when the app goes to background
+        stopSelf()  // This stops the service
     }
 }

@@ -1,26 +1,27 @@
 package com.example.naturalsound
 
-import android.annotation.SuppressLint
-import android.app.Application
 import android.content.Context
 import android.media.MediaPlayer
-import android.media.SoundPool
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.naturalsound.sound_play.Player
 import com.example.naturalsound.sound_play.PlayerImpl
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-
+import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
 
     private val player: Player by lazy { PlayerImpl() }
+    private var mediaPlayerList = HashMap<Int, MediaPlayer>()
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
-    private var mediaPlayerList = HashMap<Int, MediaPlayer>()
+    var timerJob: Job? = null
+
 
     val sounds = listOf(
         SoundState(1, "Rain", R.raw.rain),
@@ -57,11 +58,31 @@ class MainViewModel : ViewModel() {
     }
 
     fun resetSound() {
-        _uiState.update { it.copy(selectList = mutableListOf()) }
+        timerJob?.cancel()
+        timerJob = null
         player.resetSound()
+        _uiState.update { it.copy(selectList = mutableListOf(), counter = 0) }
+    }
+
+    fun setTimer(timer: Int) {
+        timerJob = viewModelScope.launch {
+            if (uiState.value.counter == null) {
+                _uiState.update { it.copy(counter = timer) }
+            }
+            var stepTime = timer
+            while (stepTime >= 1) {
+                delay(1000)
+                stepTime--
+                _uiState.update { it.copy(counter = stepTime) }
+            }
+            if (stepTime < 1) {
+                resetSound()
+            }
+        }
     }
 }
 
 data class UiState(
     val selectList: MutableList<SoundState?> = mutableListOf(),
+    val counter: Int? = null
 )

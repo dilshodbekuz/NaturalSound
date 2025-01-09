@@ -31,7 +31,7 @@ fun TopBar(onClick: () -> Unit) {
             "Natural Sound",
             color = AppColors.color.textColor,
             fontWeight = FontWeight.W700,
-            fontSize = 20.sp
+            fontSize = 24.sp
         )
         Spacer(modifier = Modifier.weight(1f))
         IconButton(onClick = onClick) {
