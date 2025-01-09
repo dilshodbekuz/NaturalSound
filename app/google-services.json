@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "102344078001",
-    "project_id": "natural-sound-96f89",
-    "storage_bucket": "natural-sound-96f89.firebasestorage.app"
+    "project_number": "474984178101",
+    "project_id": "naturalsound-6e12b",
+    "storage_bucket": "naturalsound-6e12b.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:102344078001:android:e7ce88fa8e3b33aebda890",
+        "mobilesdk_app_id": "1:474984178101:android:3b806768600444ab87b9fc",
         "android_client_info": {
           "package_name": "com.example.naturalsound"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAm1Kt3EqQjboivVNSVk9MW1vZLDT6_cBU"
+          "current_key": "AIzaSyC-Se_wVsa8tXX8uWxp6X35_U8gL4lGpUc"
         }
       ],
       "services": {
