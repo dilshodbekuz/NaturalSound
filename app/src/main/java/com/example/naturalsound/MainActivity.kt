@@ -4,18 +4,17 @@ import android.Manifest
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.naturalsound.service.MyForegroundService
-import com.example.naturalsound.sound_play.Player
-import com.example.naturalsound.sound_play.PlayerImpl
 
 class MainActivity : ComponentActivity() {
+    private lateinit var viewModel: MainViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -27,7 +26,7 @@ class MainActivity : ComponentActivity() {
         }
         enableEdgeToEdge()
         setContent {
-            val viewModel: MainViewModel = viewModel()
+            viewModel = viewModel()
             MainView(viewModel)
         }
     }
@@ -53,6 +52,7 @@ class MainActivity : ComponentActivity() {
 //
     override fun onDestroy() {
         super.onDestroy()
+        viewModel.resetSound()
         val serviceIntent = Intent(this, MyForegroundService::class.java)
         stopService(serviceIntent)
     }

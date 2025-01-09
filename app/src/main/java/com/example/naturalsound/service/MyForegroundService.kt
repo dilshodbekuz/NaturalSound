@@ -56,20 +56,15 @@ class MyForegroundService : Service(),LifecycleObserver {
             .setContentText("The service is running in the background.")
             .setSmallIcon(R.drawable.ic_music_)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentIntent(
-                PendingIntent.getActivity(
-                    this,
-                    2,
-                    Intent(this, MainActivity::class.java),
-                    PendingIntent.FLAG_IMMUTABLE
-                )
-            )
+//            .setContentIntent(
+//                PendingIntent.getActivity(
+//                    this,
+//                    2,
+//                    Intent(this, MainActivity::class.java),
+//                    PendingIntent.FLAG_IMMUTABLE
+//                )
+//            )
             .build()
         startForeground(SERVICE_ID, notification)
-    }
-    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    fun onAppPaused() {
-        // Stop the foreground service when the app goes to background
-        stopSelf()  // This stops the service
     }
 }
