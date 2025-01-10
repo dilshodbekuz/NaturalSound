@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.naturalsound.ui.theme.AppColors
@@ -18,6 +19,7 @@ fun Text16spBold(text: String) {
         color = AppColors.color.textColor
     )
 }
+
 @Composable
 fun Text18spBold(text: String) {
     Text(
@@ -27,12 +29,18 @@ fun Text18spBold(text: String) {
         color = AppColors.color.textColor
     )
 }
+
 @Composable
-fun Text24spBold(text: String) {
+fun Text24spBold(
+    modifier: Modifier = Modifier,
+    text: String,
+    color: Color = AppColors.color.textColor
+) {
     Text(
+        modifier = modifier,
         text = text,
         fontSize = 24.sp,
         fontWeight = FontWeight.W700,
-        color = AppColors.color.textColor
+        color = color
     )
 }
