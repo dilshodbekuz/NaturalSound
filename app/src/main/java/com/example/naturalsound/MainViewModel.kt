@@ -24,18 +24,19 @@ class MainViewModel : ViewModel() {
 
 
     val sounds = listOf(
-        SoundState(1, "Rain", R.raw.rain),
-        SoundState(2, "Fire", R.raw.fire),
-        SoundState(3, "Typing", R.raw.typing),
-        SoundState(4, "Birds", R.raw.birds),
-        SoundState(5, "Ocean", R.raw.ocean),
-        SoundState(6, "Water Full", R.raw.water_full),
-        SoundState(7, "Drip", R.raw.drip),
-        SoundState(8, "Storm", R.raw.storm)
+        SoundModel(1, "Rain", R.raw.rain, R.drawable.rain),
+        SoundModel(2, "Fire", R.raw.fire),
+        SoundModel(3, "Typing", R.raw.typing),
+        SoundModel(4, "Birds", R.raw.birds),
+        SoundModel(5, "Ocean", R.raw.ocean),
+        SoundModel(6, "Water Full", R.raw.water_full),
+        SoundModel(7, "Drip", R.raw.drip),
+        SoundModel(8, "Storm", R.raw.storm),
+        SoundModel(9, "Wind", R.raw.wind)
     )
 
-    fun playSound(context: Context, item: SoundState?) {
-        val selectList = mutableListOf<SoundState?>()
+    fun playSound(context: Context, item: SoundModel?) {
+        val selectList = mutableListOf<SoundModel?>()
         selectList.addAll(uiState.value.selectList)
         selectList.add(item)
         _uiState.update { it.copy(selectList = selectList) }
@@ -47,8 +48,8 @@ class MainViewModel : ViewModel() {
         mediaPlayerList[item!!.id!!] = mediaPlayer
     }
 
-    fun stopSound(item: SoundState?) {
-        val selectList = mutableListOf<SoundState?>()
+    fun stopSound(item: SoundModel?) {
+        val selectList = mutableListOf<SoundModel?>()
         selectList.addAll(uiState.value.selectList)
         selectList.remove(item)
         _uiState.update { it.copy(selectList = selectList) }
@@ -83,6 +84,6 @@ class MainViewModel : ViewModel() {
 }
 
 data class UiState(
-    val selectList: MutableList<SoundState?> = mutableListOf(),
+    val selectList: MutableList<SoundModel?> = mutableListOf(),
     val counter: Int? = null
 )
