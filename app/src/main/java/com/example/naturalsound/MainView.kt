@@ -1,10 +1,10 @@
 package com.example.naturalsound
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -98,6 +98,7 @@ fun MainView(viewModel: MainViewModel) {
                 item {}
                 items(viewModel.sounds) { item ->
                     SoundItem(
+                        image = item.image,
                         value = item.value,
                         isPlayer = uiState.selectList.contains(item),
                         onClick = {
@@ -197,30 +198,33 @@ fun TimerItem(modifier: Modifier, time: Int, onClick: () -> Unit) {
 }
 
 @Composable
-fun SoundItem(value: String, isPlayer: Boolean, onClick: () -> Unit) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(8.dp)
-        .clip(RoundedCornerShape(12.dp))
-        .background(if (isPlayer) AppColors.color.selectedColor else AppColors.color.darkColor)
-        .clickable { onClick() }
-        .padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(
-            modifier = Modifier
-                .clip(CircleShape)
-                .size(48.dp)
-                .background(Color(0xFF5A7380))
-                .padding(8.dp),
-            painter = painterResource(R.drawable.ic_music_),
-            tint = Color.White,
-            contentDescription = null
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            value,
-            fontSize = 16.sp,
-            color = AppColors.color.textColor,
-            fontWeight = FontWeight.Bold
-        )
+fun SoundItem(image: Int?, value: String, isPlayer: Boolean, onClick: () -> Unit) {
+    Box() {
+        Icon(painter = painterResource(image ?: R.drawable.ic_music_), contentDescription = null)
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clip(RoundedCornerShape(12.dp))
+//            .background(if (isPlayer) AppColors.color.selectedColor else AppColors.color.darkColor)
+            .clickable { onClick() }
+            .padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .size(48.dp)
+                    .background(Color(0xFF5A7380))
+                    .padding(8.dp),
+                painter = painterResource(R.drawable.ic_music_),
+                tint = Color.White,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                value,
+                fontSize = 16.sp,
+                color = AppColors.color.textColor,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
