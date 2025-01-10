@@ -20,7 +20,7 @@ class MainViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
-    var timerJob: Job? = null
+    private var timerJob: Job? = null
 
 
     val sounds = listOf(
