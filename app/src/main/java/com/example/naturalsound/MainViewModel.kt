@@ -25,14 +25,14 @@ class MainViewModel : ViewModel() {
 
     val sounds = listOf(
         SoundModel(1, "Rain", R.raw.rain, R.drawable.rain),
-        SoundModel(2, "Fire", R.raw.fire),
-        SoundModel(3, "Typing", R.raw.typing),
-        SoundModel(4, "Birds", R.raw.birds),
-        SoundModel(5, "Ocean", R.raw.ocean),
-        SoundModel(6, "Water Full", R.raw.water_full),
-        SoundModel(7, "Drip", R.raw.drip),
-        SoundModel(8, "Storm", R.raw.storm),
-        SoundModel(9, "Wind", R.raw.wind)
+        SoundModel(2, "Fire", R.raw.fire, R.drawable.fire),
+        SoundModel(3, "Typing", R.raw.typing, R.drawable.typing),
+        SoundModel(4, "Birds", R.raw.birds, R.drawable.birds),
+        SoundModel(5, "Ocean", R.raw.ocean, R.drawable.ocean),
+        SoundModel(6, "Water Full", R.raw.water_full, R.drawable.waterfall),
+        SoundModel(7, "Drip", R.raw.drip, R.drawable.drip),
+        SoundModel(8, "Storm", R.raw.storm, R.drawable.storm),
+        SoundModel(9, "Wind", R.raw.wind, R.drawable.wind)
     )
 
     fun playSound(context: Context, item: SoundModel?) {
