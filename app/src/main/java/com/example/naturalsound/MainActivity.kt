@@ -11,7 +11,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.naturalsound.service.MyForegroundService
+import com.example.naturalsound.ui.theme.NaturalSoundTheme
 
 class MainActivity : ComponentActivity() {
     private lateinit var viewModel: MainViewModel
@@ -27,7 +31,20 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             viewModel = viewModel()
-            MainView(viewModel)
+            val navController = rememberNavController()
+            NaturalSoundTheme {
+                NavHost(
+                    navController = navController,
+                    startDestination = "splash"
+                ) {
+                    composable("splash") {
+                        SplashScreen(navController)
+                    }
+                    composable("home") {
+                        MainView(viewModel)
+                    }
+                }
+            }
         }
     }
 

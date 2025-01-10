@@ -54,123 +54,121 @@ fun MainView(viewModel: MainViewModel) {
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
-    NaturalSoundTheme {
-        Scaffold(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(AppColors.color.background)
-                .systemBarsPadding(),
-            topBar = { TopBar(onClick = viewModel::resetSound) },
-            floatingActionButton = {
-                AnimatedVisibility(uiState.selectList.isNotEmpty()) {
-                    FloatingActionButton(
-                        shape = RoundedCornerShape(50),
-                        containerColor = AppColors.color.selectedColor,
-                        onClick = {
-                            showBottomSheet = true
-                        }
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(R.drawable.timer),
-                            contentDescription = null
-                        )
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppColors.color.background)
+            .systemBarsPadding(),
+        topBar = { TopBar(onClick = viewModel::resetSound) },
+        floatingActionButton = {
+            AnimatedVisibility(uiState.selectList.isNotEmpty()) {
+                FloatingActionButton(
+                    shape = RoundedCornerShape(50),
+                    containerColor = AppColors.color.selectedColor,
+                    onClick = {
+                        showBottomSheet = true
                     }
-                }
-            },
-            content = { paddingValues ->
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier
-                        .background(AppColors.color.background)
-                        .fillMaxSize()
-                        .padding(horizontal = 12.dp)
-                        .padding(paddingValues)
                 ) {
-                    item {
-                        AnimatedVisibility(uiState.counter != 0 && uiState.counter != null) {
-                            Text(
-                                "End Time... ${uiState.counter}s",
-                                color = AppColors.color.selectedColor,
-                                fontSize = 18.sp
-                            )
-                        }
-                    }
-                    item {}
-                    items(viewModel.sounds) { item ->
-                        SoundItem(
-                            value = item.value,
-                            isPlayer = uiState.selectList.contains(item),
-                            onClick = {
-                                if (uiState.selectList.contains(item)) {
-                                    viewModel.stopSound(item)
-                                } else viewModel.playSound(context, item)
-                            },
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = painterResource(R.drawable.timer),
+                        contentDescription = null
+                    )
+                }
+            }
+        },
+        content = { paddingValues ->
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier
+                    .background(AppColors.color.background)
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp)
+                    .padding(paddingValues)
+            ) {
+                item {
+                    AnimatedVisibility(uiState.counter != 0 && uiState.counter != null) {
+                        Text(
+                            "End Time... ${uiState.counter}s",
+                            color = AppColors.color.selectedColor,
+                            fontSize = 18.sp
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
-                if (showBottomSheet) {
-                    ModalBottomSheet(
-                        containerColor = AppColors.color.background,
-                        onDismissRequest = {
-                            showBottomSheet = false
+                item {}
+                items(viewModel.sounds) { item ->
+                    SoundItem(
+                        value = item.value,
+                        isPlayer = uiState.selectList.contains(item),
+                        onClick = {
+                            if (uiState.selectList.contains(item)) {
+                                viewModel.stopSound(item)
+                            } else viewModel.playSound(context, item)
                         },
-                        sheetState = sheetState
-                    ) {
-                        Column {
-                            Text(
-                                "Set Timer",
-                                fontSize = 18.sp,
-                                color = AppColors.color.selectedColor,
-                                fontWeight = FontWeight.W700,
-                                modifier = Modifier.padding(start = 16.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+            if (showBottomSheet) {
+                ModalBottomSheet(
+                    containerColor = AppColors.color.background,
+                    onDismissRequest = {
+                        showBottomSheet = false
+                    },
+                    sheetState = sheetState
+                ) {
+                    Column {
+                        Text(
+                            "Set Timer",
+                            fontSize = 18.sp,
+                            color = AppColors.color.selectedColor,
+                            fontWeight = FontWeight.W700,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            TimerItem(
+                                modifier = Modifier.weight(1f),
+                                time = 5,
+                                onClick = {
+                                    showBottomSheet = false
+                                    viewModel.setTimer(5)
+                                }
                             )
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                TimerItem(
-                                    modifier = Modifier.weight(1f),
-                                    time = 5,
-                                    onClick = {
-                                        showBottomSheet = false
-                                        viewModel.setTimer(5)
-                                    }
-                                )
-                                TimerItem(
-                                    modifier = Modifier.weight(1f),
-                                    time = 15,
-                                    onClick = {
-                                        showBottomSheet = false
-                                        viewModel.setTimer(15)
-                                    }
-                                )
-                                TimerItem(
-                                    modifier = Modifier.weight(1f),
-                                    time = 30,
-                                    onClick = {
-                                        showBottomSheet = false
-                                        viewModel.setTimer(30)
-                                    }
-                                )
-                                TimerItem(
-                                    modifier = Modifier.weight(1f),
-                                    time = 60,
-                                    onClick = {
-                                        showBottomSheet = false
-                                        viewModel.setTimer(60)
-                                    }
-                                )
-                            }
+                            TimerItem(
+                                modifier = Modifier.weight(1f),
+                                time = 15,
+                                onClick = {
+                                    showBottomSheet = false
+                                    viewModel.setTimer(15)
+                                }
+                            )
+                            TimerItem(
+                                modifier = Modifier.weight(1f),
+                                time = 30,
+                                onClick = {
+                                    showBottomSheet = false
+                                    viewModel.setTimer(30)
+                                }
+                            )
+                            TimerItem(
+                                modifier = Modifier.weight(1f),
+                                time = 60,
+                                onClick = {
+                                    showBottomSheet = false
+                                    viewModel.setTimer(60)
+                                }
+                            )
                         }
                     }
                 }
             }
-        )
-    }
+        }
+    )
 }
 
 @Composable

@@ -91,7 +91,8 @@ data class NaturalSoundColors(
     val background: Color,
     val textColor: Color,
     val selectedColor: Color,
-    val darkColor: Color
+    val darkColor: Color,
+    val white: Color
 )
 
 object ThemeColors {
@@ -102,6 +103,7 @@ object ThemeColors {
     private val themeDark = NaturalSoundColors(
         background = Color(0xFF2F2F38),
         textColor = Color(0xFFFFFFFF),
+        white = Color(0xFFFFFFFF),
         selectedColor = Color(0xFF4DE8E8),
         darkColor = Color(0xFF000000)
     )
@@ -109,6 +111,7 @@ object ThemeColors {
         background = Color(0xFFF2F2F7),
         textColor = Color(0xFF000000),
         selectedColor = Color(0xFF4DE8E8),
-        darkColor = Color(0xFFFFFFFF)
+        darkColor = Color(0xFFFFFFFF),
+        white = Color(0xFFFFFFFF),
     )
 }
