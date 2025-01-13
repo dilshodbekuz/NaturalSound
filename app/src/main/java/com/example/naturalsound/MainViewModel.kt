@@ -70,13 +70,13 @@ class MainViewModel : ViewModel() {
             if (uiState.value.counter == null) {
                 _uiState.update { it.copy(counter = timer) }
             }
-            var stepTime = timer
+            var stepTime = timer * 60
             while (stepTime >= 1) {
-                delay(1000)
                 stepTime--
                 _uiState.update { it.copy(counter = stepTime) }
+                delay(1000)
             }
-            if (stepTime < 1) {
+            if (stepTime.toInt() < 1) {
                 resetSound()
             }
         }

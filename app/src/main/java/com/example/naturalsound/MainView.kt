@@ -1,6 +1,13 @@
 package com.example.naturalsound
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,8 +45,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -47,11 +61,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.naturalsound.composable.Spacer4
 import com.example.naturalsound.composable.Text24spBold
 import com.example.naturalsound.composable.TopBar
 import com.example.naturalsound.ui.theme.AppColors
 import com.example.naturalsound.ui.theme.NaturalSoundTheme
+import kotlin.math.round
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,122 +77,126 @@ fun MainView(viewModel: MainViewModel) {
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(AppColors.color.background)
-            .systemBarsPadding(),
-        topBar = { TopBar(onClick = viewModel::resetSound) },
-        floatingActionButton = {
-            AnimatedVisibility(uiState.selectList.isNotEmpty()) {
-                FloatingActionButton(
-                    shape = RoundedCornerShape(50),
-                    containerColor = AppColors.color.selectedColor,
-                    onClick = {
-                        showBottomSheet = true
-                    }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        painter = painterResource(R.drawable.timer),
-                        contentDescription = null
-                    )
-                }
-            }
-        },
-        content = { paddingValues ->
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier
-                    .background(AppColors.color.background)
-                    .fillMaxSize()
-                    .padding(horizontal = 12.dp)
-                    .padding(paddingValues)
-            ) {
-                item {
-                    AnimatedVisibility(uiState.counter != 0 && uiState.counter != null) {
-                        Text(
-                            "End Time... ${uiState.counter}s",
-                            color = AppColors.color.selectedColor,
-                            fontSize = 18.sp
-                        )
-                    }
-                }
-                item {}
-                items(viewModel.sounds) { item ->
-                    SoundItem(
-                        image = item.image,
-                        value = item.value,
-                        isPlayer = uiState.selectList.contains(item),
+    Box(modifier = Modifier.fillMaxSize()) {
+        SnowfallEffect()
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding(),
+            containerColor = Color.Transparent,
+            topBar = { TopBar(onClick = viewModel::resetSound) },
+            floatingActionButton = {
+                AnimatedVisibility(uiState.selectList.isNotEmpty()) {
+                    FloatingActionButton(
+                        shape = RoundedCornerShape(50),
+                        containerColor = AppColors.color.selectedColor,
                         onClick = {
-                            if (uiState.selectList.contains(item)) {
-                                viewModel.stopSound(item)
-                            } else viewModel.playSound(context, item)
-                        },
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-            }
-            if (showBottomSheet) {
-                ModalBottomSheet(
-                    containerColor = AppColors.color.background,
-                    onDismissRequest = {
-                        showBottomSheet = false
-                    },
-                    sheetState = sheetState
-                ) {
-                    Column {
-                        Text(
-                            "Set Timer",
-                            fontSize = 18.sp,
-                            color = AppColors.color.selectedColor,
-                            fontWeight = FontWeight.W700,
-                            modifier = Modifier.padding(start = 16.dp)
+                            showBottomSheet = true
+                        }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(R.drawable.timer),
+                            contentDescription = null
                         )
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            TimerItem(
-                                modifier = Modifier.weight(1f),
-                                time = 5,
-                                onClick = {
-                                    showBottomSheet = false
-                                    viewModel.setTimer(5)
-                                }
+                    }
+                }
+            },
+            content = { paddingValues ->
+
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier
+//                        .background(AppColors.color.background)
+                        .fillMaxSize()
+                        .padding(horizontal = 12.dp)
+                        .padding(paddingValues)
+                ) {
+                    item {
+                        AnimatedVisibility(uiState.counter != 0 && uiState.counter != null) {
+                            Text(
+                                "End Time... ${uiState.counter}s",
+                                color = AppColors.color.selectedColor,
+                                fontSize = 18.sp
                             )
-                            TimerItem(
-                                modifier = Modifier.weight(1f),
-                                time = 15,
-                                onClick = {
-                                    showBottomSheet = false
-                                    viewModel.setTimer(15)
-                                }
+                        }
+                    }
+                    item {}
+                    items(viewModel.sounds) { item ->
+                        SoundItem(
+                            image = item.image,
+                            value = item.value,
+                            isPlayer = uiState.selectList.contains(item),
+                            onClick = {
+                                if (uiState.selectList.contains(item)) {
+                                    viewModel.stopSound(item)
+                                } else viewModel.playSound(context, item)
+                            },
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+                if (showBottomSheet) {
+                    ModalBottomSheet(
+                        containerColor = AppColors.color.background,
+                        onDismissRequest = {
+                            showBottomSheet = false
+                        },
+                        sheetState = sheetState
+                    ) {
+                        Column {
+                            Text(
+                                "Set Timer",
+                                fontSize = 18.sp,
+                                color = AppColors.color.selectedColor,
+                                fontWeight = FontWeight.W700,
+                                modifier = Modifier.padding(start = 16.dp)
                             )
-                            TimerItem(
-                                modifier = Modifier.weight(1f),
-                                time = 30,
-                                onClick = {
-                                    showBottomSheet = false
-                                    viewModel.setTimer(30)
-                                }
-                            )
-                            TimerItem(
-                                modifier = Modifier.weight(1f),
-                                time = 60,
-                                onClick = {
-                                    showBottomSheet = false
-                                    viewModel.setTimer(60)
-                                }
-                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                TimerItem(
+                                    modifier = Modifier.weight(1f),
+                                    time = 5,
+                                    onClick = {
+                                        showBottomSheet = false
+                                        viewModel.setTimer(5)
+                                    }
+                                )
+                                TimerItem(
+                                    modifier = Modifier.weight(1f),
+                                    time = 15,
+                                    onClick = {
+                                        showBottomSheet = false
+                                        viewModel.setTimer(15)
+                                    }
+                                )
+                                TimerItem(
+                                    modifier = Modifier.weight(1f),
+                                    time = 30,
+                                    onClick = {
+                                        showBottomSheet = false
+                                        viewModel.setTimer(30)
+                                    }
+                                )
+                                TimerItem(
+                                    modifier = Modifier.weight(1f),
+                                    time = 60,
+                                    onClick = {
+                                        showBottomSheet = false
+                                        viewModel.setTimer(60)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
-    )
+        )
+    }
 }
 
 @Composable
@@ -196,7 +217,7 @@ fun TimerItem(modifier: Modifier, time: Int, onClick: () -> Unit) {
         )
         Spacer4()
         Text(
-            "$time s",
+            "$time min",
             color = AppColors.color.textColor,
             fontSize = 12.sp
         )
@@ -212,18 +233,19 @@ fun SoundItem(image: Int?, value: String, isPlayer: Boolean, onClick: () -> Unit
             .size(100.dp)
             .clickable { onClick() }
     ) {
-        Image(
-            painter = painterResource(image ?: R.drawable.storm),
+        AsyncImage(
+            model = image,
             contentDescription = null,
-            contentScale = ContentScale.Crop,
+            placeholder = painterResource(R.drawable.download),
             modifier = Modifier
                 .fillMaxSize()
-                .graphicsLayer(alpha = 0.6f)
+                .graphicsLayer(alpha = 0.7f)
                 .border(
                     width = 2.dp,
                     shape = RoundedCornerShape(18.dp),
                     color = if (isPlayer) AppColors.color.selectedColor else Color.Transparent
-                )
+                ),
+            contentScale = ContentScale.Crop
         )
         Text24spBold(
             modifier = Modifier.align(Alignment.Center),
