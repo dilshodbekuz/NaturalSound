@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.example.naturalsound.ui.theme.AppColors
 
@@ -34,11 +35,13 @@ fun Text18spBold(text: String) {
 fun Text24spBold(
     modifier: Modifier = Modifier,
     text: String,
-    color: Color = AppColors.color.textColor
+    color: Color = AppColors.color.textColor,
+    textAlign: TextAlign = TextAlign.Unspecified
 ) {
     Text(
         modifier = modifier,
         text = text,
+        textAlign = textAlign,
         fontSize = 24.sp,
         fontWeight = FontWeight.W700,
         color = color
