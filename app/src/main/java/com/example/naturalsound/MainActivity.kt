@@ -14,7 +14,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.naturalsound.main.MainView
+import com.example.naturalsound.main.MainViewModel
 import com.example.naturalsound.service.MyForegroundService
+import com.example.naturalsound.splash.SplashScreen
 import com.example.naturalsound.ui.theme.NaturalSoundTheme
 
 class MainActivity : ComponentActivity() {
@@ -56,17 +59,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         super.onStop()
-        val serviceIntent = Intent(this, MyForegroundService::class.java)
-        ContextCompat.startForegroundService(this, serviceIntent)
+        if (viewModel.uiState.value.selectList.isNotEmpty()) {
+            val serviceIntent = Intent(this, MyForegroundService::class.java)
+            ContextCompat.startForegroundService(this, serviceIntent)
+        }
     }
 
-
-    //    override fun onPause() {
-//        super.onPause()
-//        val serviceIntent = Intent(this, MyForegroundService::class.java)
-//        ContextCompat.startForegroundService(this, serviceIntent)
-//    }
-//
     override fun onDestroy() {
         super.onDestroy()
         viewModel.resetSound()

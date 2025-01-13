@@ -1,9 +1,10 @@
-package com.example.naturalsound
+package com.example.naturalsound.main
 
 import android.content.Context
 import android.media.MediaPlayer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.naturalsound.R
 import com.example.naturalsound.sound_play.Player
 import com.example.naturalsound.sound_play.PlayerImpl
 import kotlinx.coroutines.Job

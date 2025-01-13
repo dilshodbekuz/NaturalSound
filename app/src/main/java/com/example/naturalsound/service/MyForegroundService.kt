@@ -50,8 +50,8 @@ class MyForegroundService : Service(),LifecycleObserver {
             notificationManager.createNotificationChannel(channel)
         }
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setShowWhen(true)
-            .setAutoCancel(true)
+//            .setShowWhen(true)
+//            .setAutoCancel(true)
             .setContentTitle("Sounds is running...")
             .setContentText("The service is running in the background.")
             .setSmallIcon(R.drawable.ic_music_)

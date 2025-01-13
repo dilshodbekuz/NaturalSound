@@ -1,4 +1,4 @@
-package com.example.naturalsound
+package com.example.naturalsound.main
 
 data class SoundModel(
     val id: Int? = null,
