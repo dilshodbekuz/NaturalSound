@@ -31,7 +31,6 @@ class MainActivity : ComponentActivity() {
                 0
             )
         }
-        enableEdgeToEdge()
         setContent {
             viewModel = viewModel()
             val navController = rememberNavController()

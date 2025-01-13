@@ -36,7 +36,11 @@ import kotlin.random.Random
 fun SplashScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         delay(1000)
-        navController.navigate("home")
+        navController.navigate("home"){
+            popUpTo(route = "splash"){
+                inclusive = true
+            }
+        }
     }
     Column(
         modifier = Modifier
