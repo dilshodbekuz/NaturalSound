@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -27,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,9 +48,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.naturalsound.R
+import com.example.naturalsound.composable.MainTopBar
 import com.example.naturalsound.composable.Spacer4
 import com.example.naturalsound.composable.Text24spBold
-import com.example.naturalsound.composable.TopBar
 import com.example.naturalsound.splash.SnowfallEffect
 import com.example.naturalsound.ui.theme.AppColors
 
@@ -59,6 +61,12 @@ fun MainView(viewModel: MainViewModel) {
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
+    LaunchedEffect(uiState.selectList.isEmpty()) {
+        if (uiState.counter != 0) {
+            viewModel.timerJob?.cancel()
+            viewModel.setTimer(0)
+        }
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         SnowfallEffect()
         Scaffold(
@@ -66,7 +74,11 @@ fun MainView(viewModel: MainViewModel) {
                 .fillMaxSize()
                 .systemBarsPadding(),
             containerColor = Color.Transparent,
-            topBar = { TopBar(onClick = viewModel::resetSound) },
+            topBar = {
+                Column {
+                    MainTopBar(counter = uiState.counter, onClick = viewModel::resetSound)
+                }
+            },
             floatingActionButton = {
                 AnimatedVisibility(uiState.selectList.isNotEmpty()) {
                     FloatingActionButton(
@@ -85,25 +97,13 @@ fun MainView(viewModel: MainViewModel) {
                 }
             },
             content = { paddingValues ->
-
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier
-//                        .background(AppColors.color.background)
                         .fillMaxSize()
                         .padding(horizontal = 12.dp)
                         .padding(paddingValues)
                 ) {
-                    item {
-                        AnimatedVisibility(uiState.counter != 0 && uiState.counter != null) {
-                            Text(
-                                "End Time... ${uiState.counter}s",
-                                color = AppColors.color.selectedColor,
-                                fontSize = 18.sp
-                            )
-                        }
-                    }
-                    item {}
                     items(viewModel.sounds) { item ->
                         SoundItem(
                             image = item.image,
@@ -126,7 +126,7 @@ fun MainView(viewModel: MainViewModel) {
                         },
                         sheetState = sheetState
                     ) {
-                        Column {
+                        Column(modifier = Modifier.navigationBarsPadding()) {
                             Text(
                                 "Set Timer",
                                 fontSize = 18.sp,

@@ -21,7 +21,7 @@ class MainViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
-    private var timerJob: Job? = null
+    var timerJob: Job? = null
 
 
     val sounds = listOf(
@@ -34,15 +34,20 @@ class MainViewModel : ViewModel() {
         SoundModel(7, "Drip", R.raw.drip, R.drawable.drip),
         SoundModel(8, "Storm", R.raw.storm, R.drawable.storm),
         SoundModel(9, "Wind", R.raw.wind, R.drawable.strong_wind),
-        SoundModel(10, "Bird", R.raw.bird_pure_sound,R.drawable.pure_bird),
-        SoundModel(11, "Birds and Frogs", R.raw.birds_and_frogs_in_forest,R.drawable.frog_and_bords),
-        SoundModel(12, "Calm Rain", R.raw.calm_rain,R.drawable.calm_rain),
-        SoundModel(13, "Calm River", R.raw.calm_river,R.drawable.calm_river),
-        SoundModel(14, "Storm and Rain", R.raw.storm_and_rain,R.drawable.storm_rain),
-        SoundModel(15, "Strong Wind", R.raw.strong_wild_wind,R.drawable.strong_wind),
-        SoundModel(16, "Mountain River", R.raw.calm_mountain_river,R.drawable.mountain_river),
-        SoundModel(17, "Calm Forest", R.raw.calm_forest,R.drawable.calm_forest),
-        SoundModel(18, "Jungle", R.raw.jungle,R.drawable.jungle),
+        SoundModel(10, "Bird", R.raw.bird_pure_sound, R.drawable.pure_bird),
+        SoundModel(
+            11,
+            "Birds and Frogs",
+            R.raw.birds_and_frogs_in_forest,
+            R.drawable.frog_and_bords
+        ),
+        SoundModel(12, "Calm Rain", R.raw.calm_rain, R.drawable.calm_rain),
+        SoundModel(13, "Calm River", R.raw.calm_river, R.drawable.calm_river),
+        SoundModel(14, "Storm and Rain", R.raw.storm_and_rain, R.drawable.storm_rain),
+        SoundModel(15, "Strong Wind", R.raw.strong_wild_wind, R.drawable.strong_wind),
+        SoundModel(16, "Mountain River", R.raw.calm_mountain_river, R.drawable.mountain_river),
+        SoundModel(17, "Calm Forest", R.raw.calm_forest, R.drawable.calm_forest),
+        SoundModel(18, "Jungle", R.raw.jungle, R.drawable.jungle),
     )
 
     fun playSound(context: Context, item: SoundModel?) {
@@ -76,6 +81,7 @@ class MainViewModel : ViewModel() {
     }
 
     fun setTimer(timer: Int) {
+        timerJob?.cancel()
         timerJob = viewModelScope.launch {
             if (uiState.value.counter == null) {
                 _uiState.update { it.copy(counter = timer) }
