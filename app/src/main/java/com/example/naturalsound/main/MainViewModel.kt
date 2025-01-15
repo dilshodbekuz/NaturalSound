@@ -47,6 +47,14 @@ class MainViewModel : ViewModel() {
         SoundModel(16, "Mountain River", R.raw.calm_mountain_river, R.drawable.mountain_river),
         SoundModel(17, "Calm Forest", R.raw.calm_forest, R.drawable.calm_forest),
         SoundModel(18, "Jungle", R.raw.jungle, R.drawable.jungle),
+        SoundModel(19, "Orphean", R.raw.eastern_orphean_bird, R.drawable.eastern_orphean),
+        SoundModel(20, "Erithacus Rebecula", R.raw.erithacus_rebecula_bird, R.drawable.robin_bird),
+        SoundModel(21, "Greater Hoopoe", R.raw.greater_hoopoe_bird, R.drawable.greater_hoopoe),
+        SoundModel(22, "Hermit Thrush", R.raw.hermit_thrush_bird, R.drawable.hermit_thrush_bird),
+        SoundModel(23, "Indian Malabar", R.raw.indian_malabar_bird, R.drawable.indian_malabar_bird),
+        SoundModel(25, "Olive Whistler", R.raw.olive_whistler_bird, R.drawable.olive_whistler),
+        SoundModel(26, "Pied Butcherbird", R.raw.pied_butcherbird, R.drawable.pied_butcherbird),
+        SoundModel(27, "Woodlark", R.raw.woodlark_bird, R.drawable.woodlark_bird),
     )
 
     init {
