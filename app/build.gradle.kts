@@ -67,5 +67,6 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.google.firebase.crashlytics)
     implementation(libs.firebase.analytics)
-    implementation("io.coil-kt:coil-compose:2.2.2")
+    implementation(libs.coil.compose)
+    implementation(libs.kotlinx.collections.immutable)
 }

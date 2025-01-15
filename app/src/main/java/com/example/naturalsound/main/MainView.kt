@@ -37,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -49,8 +50,10 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.naturalsound.R
 import com.example.naturalsound.composable.MainTopBar
+import com.example.naturalsound.composable.Snowflake
 import com.example.naturalsound.composable.Spacer4
 import com.example.naturalsound.composable.Text24spBold
+import com.example.naturalsound.composable.snowfall
 import com.example.naturalsound.splash.SnowfallEffect
 import com.example.naturalsound.ui.theme.AppColors
 
@@ -67,8 +70,19 @@ fun MainView(viewModel: MainViewModel) {
             viewModel.setTimer(0)
         }
     }
-    Box(modifier = Modifier.fillMaxSize()) {
-        SnowfallEffect()
+    val brush =
+        Brush.verticalGradient(
+            listOf(
+                Color(0xFF000000),
+                Color(0xFF006059)
+            )
+        )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .snowfall()
+            .background(brush = brush)
+    ) {
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
@@ -104,15 +118,13 @@ fun MainView(viewModel: MainViewModel) {
                         .padding(horizontal = 12.dp)
                         .padding(paddingValues)
                 ) {
-                    items(viewModel.sounds) { item ->
+                    items(key = { index -> index.id }, items = uiState.sounds) { item ->
                         SoundItem(
                             image = item.image,
                             value = item.value,
                             isPlayer = uiState.selectList.contains(item),
                             onClick = {
-                                if (uiState.selectList.contains(item)) {
-                                    viewModel.stopSound(item)
-                                } else viewModel.playSound(context, item)
+                                viewModel.onClickButton(item, context)
                             },
                         )
                         Spacer(modifier = Modifier.height(8.dp))

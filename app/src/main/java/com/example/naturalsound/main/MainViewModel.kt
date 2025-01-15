@@ -2,11 +2,15 @@ package com.example.naturalsound.main
 
 import android.content.Context
 import android.media.MediaPlayer
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.naturalsound.R
 import com.example.naturalsound.sound_play.Player
 import com.example.naturalsound.sound_play.PlayerImpl
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +28,7 @@ class MainViewModel : ViewModel() {
     var timerJob: Job? = null
 
 
-    val sounds = listOf(
+    private val sounds = persistentListOf(
         SoundModel(1, "Rain", R.raw.rain, R.drawable.rain),
         SoundModel(2, "Fire", R.raw.fire, R.drawable.fire),
         SoundModel(3, "Typing", R.raw.typing, R.drawable.typing),
@@ -35,12 +39,7 @@ class MainViewModel : ViewModel() {
         SoundModel(8, "Storm", R.raw.storm, R.drawable.storm),
         SoundModel(9, "Wind", R.raw.wind, R.drawable.strong_wind),
         SoundModel(10, "Bird", R.raw.bird_pure_sound, R.drawable.pure_bird),
-        SoundModel(
-            11,
-            "Birds and Frogs",
-            R.raw.birds_and_frogs_in_forest,
-            R.drawable.frog_and_bords
-        ),
+        SoundModel(11, "Birds and Frogs", R.raw.birds_vs_frog, R.drawable.frog_and_bords),
         SoundModel(12, "Calm Rain", R.raw.calm_rain, R.drawable.calm_rain),
         SoundModel(13, "Calm River", R.raw.calm_river, R.drawable.calm_river),
         SoundModel(14, "Storm and Rain", R.raw.storm_and_rain, R.drawable.storm_rain),
@@ -50,34 +49,42 @@ class MainViewModel : ViewModel() {
         SoundModel(18, "Jungle", R.raw.jungle, R.drawable.jungle),
     )
 
-    fun playSound(context: Context, item: SoundModel?) {
-        val selectList = mutableListOf<SoundModel?>()
-        selectList.addAll(uiState.value.selectList)
-        selectList.add(item)
-        _uiState.update { it.copy(selectList = selectList) }
-        val mediaPlayer = MediaPlayer.create(context, item?.sound ?: 0).apply {
-            isLooping = true
-            start()
-        }
-        player.playSound(mediaPlayer = mediaPlayer)
-        mediaPlayerList[item!!.id!!] = mediaPlayer
+    init {
+        _uiState.update { it.copy(sounds = sounds) }
     }
 
-    fun stopSound(item: SoundModel?) {
-        val selectList = mutableListOf<SoundModel?>()
-        selectList.addAll(uiState.value.selectList)
-        selectList.remove(item)
-        _uiState.update { it.copy(selectList = selectList) }
-        val mediaPlayer = mediaPlayerList[item?.id!!]
-        mediaPlayer?.stop()
-        player.stopSound(mediaPlayer!!)
+    private fun playSound(context: Context, item: SoundModel) {
+        viewModelScope.launch {
+            val selectList = mutableListOf<SoundModel>()
+            selectList.addAll(uiState.value.selectList)
+            selectList.add(item)
+            _uiState.update { it.copy(selectList = selectList.toImmutableList()) }
+            val mediaPlayer = MediaPlayer.create(context, item.sound ).apply {
+                isLooping = true
+                start()
+            }
+            player.playSound(mediaPlayer = mediaPlayer)
+            mediaPlayerList[item.id] = mediaPlayer
+        }
+    }
+
+    private fun stopSound(item: SoundModel) {
+        viewModelScope.launch {
+            val selectList = mutableListOf<SoundModel>()
+            selectList.addAll(uiState.value.selectList)
+            selectList.remove(item)
+            _uiState.update { it.copy(selectList = selectList.toImmutableList()) }
+            val mediaPlayer = mediaPlayerList[item.id]
+            mediaPlayer?.stop()
+            player.stopSound(mediaPlayer!!)
+        }
     }
 
     fun resetSound() {
         timerJob?.cancel()
         timerJob = null
         player.resetSound()
-        _uiState.update { it.copy(selectList = mutableListOf(), counter = 0) }
+        _uiState.update { it.copy(selectList = persistentListOf(), counter = 0) }
     }
 
     fun setTimer(timer: Int) {
@@ -97,9 +104,17 @@ class MainViewModel : ViewModel() {
             }
         }
     }
+
+    fun onClickButton(item: SoundModel, context: Context) {
+        if (uiState.value.selectList.contains(item)) {
+            stopSound(item)
+        } else playSound(context, item)
+    }
 }
 
+@Immutable
 data class UiState(
-    val selectList: MutableList<SoundModel?> = mutableListOf(),
+    val sounds: ImmutableList<SoundModel> = persistentListOf(),
+    val selectList: ImmutableList<SoundModel> = persistentListOf(),
     val counter: Int? = null
 )
