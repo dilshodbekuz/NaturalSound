@@ -67,7 +67,7 @@ class MainViewModel : ViewModel() {
             selectList.addAll(uiState.value.selectList)
             selectList.add(item)
             _uiState.update { it.copy(selectList = selectList.toImmutableList()) }
-            val mediaPlayer = MediaPlayer.create(context, item.sound ).apply {
+            val mediaPlayer = MediaPlayer.create(context, item.sound).apply {
                 isLooping = true
                 start()
             }
@@ -92,20 +92,28 @@ class MainViewModel : ViewModel() {
         timerJob?.cancel()
         timerJob = null
         player.resetSound()
-        _uiState.update { it.copy(selectList = persistentListOf(), counter = 0) }
+        _uiState.update { it.copy(selectList = persistentListOf(), counter = 0, progress = 1f) }
     }
 
     fun setTimer(timer: Int) {
+        _uiState.update { it.copy(progress = 1f, percentage = 100) }
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
-            if (uiState.value.counter == null) {
+            if (uiState.value.counter == 0) {
                 _uiState.update { it.copy(counter = timer) }
             }
             var stepTime = timer * 60
+            val a = timer * 60
             while (stepTime >= 1) {
                 stepTime--
                 _uiState.update { it.copy(counter = stepTime) }
                 delay(1000)
+                _uiState.update {
+                    it.copy(
+                        progress = stepTime.toFloat() / (timer * 60).toFloat(),
+                        percentage = stepTime / a
+                    )
+                }
             }
             if (stepTime.toInt() < 1) {
                 resetSound()
@@ -124,5 +132,7 @@ class MainViewModel : ViewModel() {
 data class UiState(
     val sounds: ImmutableList<SoundModel> = persistentListOf(),
     val selectList: ImmutableList<SoundModel> = persistentListOf(),
-    val counter: Int? = null
+    val counter: Int = 0,
+    val progress: Float = 1f,
+    val percentage: Int = 0
 )

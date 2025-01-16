@@ -1,5 +1,6 @@
 package com.example.naturalsound.main
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -77,6 +78,7 @@ fun MainView(viewModel: MainViewModel) {
                 Color(0xFF006059)
             )
         )
+    Log.d("aaa", "percentage ${uiState.percentage}")
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -89,9 +91,11 @@ fun MainView(viewModel: MainViewModel) {
                 .systemBarsPadding(),
             containerColor = Color.Transparent,
             topBar = {
-                Column {
-                    MainTopBar(counter = uiState.counter, onClick = viewModel::resetSound)
-                }
+                MainTopBar(
+                    counter = uiState.counter,
+                    progress = uiState.progress,
+                    onClick = viewModel::resetSound
+                )
             },
             floatingActionButton = {
                 AnimatedVisibility(uiState.selectList.isNotEmpty()) {
