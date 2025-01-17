@@ -43,7 +43,12 @@ class MainViewModel : ViewModel() {
         SoundModel(12, "Thunder", R.raw.long_thunder, R.drawable.long_thunder),
         SoundModel(13, "Peals of Thunder", R.raw.peals_of_thunder, R.drawable.peals_of_thunder),
         SoundModel(14, "Rain and Thunder", R.raw.rain_mix_thunder, R.drawable.rain_and_thunder),
-        SoundModel(15, "Rain Thunder Wind", R.raw.thunder_rain_wind_mixed, R.drawable.rain_thunder_wind_mixed),
+        SoundModel(
+            15,
+            "Rain Thunder Wind",
+            R.raw.thunder_rain_wind_mixed,
+            R.drawable.rain_thunder_wind_mixed
+        ),
         SoundModel(16, "Wind", R.raw.wind, R.drawable.normal_wind),
         SoundModel(17, "Strong Wind", R.raw.strong_wild_wind, R.drawable.strong_wind),
         SoundModel(18, "Calm Forest", R.raw.calm_forest, R.drawable.calm_forest),
@@ -96,30 +101,41 @@ class MainViewModel : ViewModel() {
         timerJob?.cancel()
         timerJob = null
         player.resetSound()
-        _uiState.update { it.copy(selectList = persistentListOf(), counter = 0, progress = 1f) }
+        _uiState.update {
+            it.copy(
+                selectList = persistentListOf(),
+                counter = 0,
+                progress = 1f,
+                sheetContentTypes = BottomSheetContentType.Times
+            )
+        }
     }
 
-    fun setTimer(timer: Int) {
-        _uiState.update { it.copy(progress = 1f, percentage = 100) }
+    fun setTimer(timer: Int, isResound: Boolean = true) {
+        _uiState.update {
+            it.copy(
+                progress = 1f
+            )
+        }
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             if (uiState.value.counter == 0) {
                 _uiState.update { it.copy(counter = timer) }
             }
             var stepTime = timer * 60
-            val a = timer * 60
             while (stepTime >= 1) {
+                val minute = stepTime / 60
+                val seconds = stepTime % 60
                 stepTime--
-                _uiState.update { it.copy(counter = stepTime) }
+                _uiState.update { it.copy(counter = stepTime, minAndSec = "$minute : $seconds") }
                 delay(1000)
                 _uiState.update {
                     it.copy(
                         progress = stepTime.toFloat() / (timer * 60).toFloat(),
-                        percentage = stepTime / a
                     )
                 }
             }
-            if (stepTime.toInt() < 1) {
+            if (stepTime.toInt() < 1 && isResound) {
                 resetSound()
             }
         }
@@ -133,7 +149,7 @@ class MainViewModel : ViewModel() {
 
     fun setSheetContent(sheetContentType: BottomSheetContentType) {
         viewModelScope.launch {
-            _uiState.update { it.copy(sheetContentTypes = sheetContentType) }
+            _uiState.update { it.copy(minAndSec = "", sheetContentTypes = sheetContentType) }
         }
     }
 }
@@ -143,8 +159,8 @@ data class UiState(
     val sounds: ImmutableList<SoundModel> = persistentListOf(),
     val selectList: ImmutableList<SoundModel> = persistentListOf(),
     val counter: Int = 0,
+    val minAndSec: String = "",
     val progress: Float = 1f,
-    val percentage: Int = 0,
     val sheetContentTypes: BottomSheetContentType = BottomSheetContentType.Times
 )
 

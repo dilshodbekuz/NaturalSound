@@ -23,12 +23,17 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ProgressIndicatorDefaults.LinearStrokeCap
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
@@ -38,6 +43,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +65,7 @@ import coil.compose.AsyncImage
 import com.example.naturalsound.R
 import com.example.naturalsound.composable.MainTopBar
 import com.example.naturalsound.composable.Spacer12
+import com.example.naturalsound.composable.Spacer16
 import com.example.naturalsound.composable.Spacer4
 import com.example.naturalsound.composable.Text24spBold
 import com.example.naturalsound.composable.snowfall
@@ -86,9 +95,11 @@ fun MainView(viewModel: MainViewModel) {
     }
 
     LaunchedEffect(uiState.selectList.isEmpty()) {
+        bottomSheetScaffoldState.bottomSheetState.hide()
         if (uiState.counter != 0) {
             viewModel.timerJob?.cancel()
             viewModel.setTimer(0)
+            viewModel.setSheetContent(BottomSheetContentType.Times)
         }
     }
     val brush =
@@ -98,7 +109,6 @@ fun MainView(viewModel: MainViewModel) {
                 Color(0xFF006059)
             )
         )
-    Log.d("aaa", "percentage ${uiState.percentage}")
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -110,33 +120,30 @@ fun MainView(viewModel: MainViewModel) {
                 .fillMaxSize()
                 .systemBarsPadding(),
             containerColor = Color.Transparent,
-            topBar = {
-                MainTopBar(onClick = viewModel::resetSound)
-            },
             sheetPeekHeight = 0.dp,
             scaffoldState = bottomSheetScaffoldState,
+            sheetContainerColor = AppColors.color.background,
             sheetContent = {
                 when (uiState.sheetContentTypes) {
                     BottomSheetContentType.Times -> {
                         TimesSheetContent(
-                            onShowTimer = {
-                                viewModel.setSheetContent(BottomSheetContentType.Progress)
+                            onShowTimer = { timer ->
                                 showSheetWithoutLagging(scope, bottomSheetScaffoldState)
-                                viewModel.setTimer(it)
+                                viewModel.setSheetContent(BottomSheetContentType.Progress)
+                                viewModel.setTimer(timer)
                             },
                         )
                     }
 
                     BottomSheetContentType.Progress -> {
                         ProgressBottomSheetContent(
-                            counter = uiState.counter,
-                            uiState.progress,
-                            modifier = Modifier.navigationBarsPadding(),
-                            onDismissSheet = {
+                            counter = uiState.minAndSec,
+                            progress = uiState.progress,
+                            onClickStop = {
                                 scope.launch {
-                                    viewModel.resetSound()
-                                    viewModel.setSheetContent(BottomSheetContentType.Times)
                                     bottomSheetScaffoldState.bottomSheetState.hide()
+                                    viewModel.setTimer(timer = 0, isResound = false)
+                                    viewModel.setSheetContent(BottomSheetContentType.Times)
                                 }
                             }
                         )
@@ -144,37 +151,46 @@ fun MainView(viewModel: MainViewModel) {
                 }
             },
             content = { paddingValues ->
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 12.dp)
-                        .padding(paddingValues)
-                ) {
-                    items(key = { index -> index.id }, items = uiState.sounds) { item ->
-                        SoundItem(
-                            image = item.image,
-                            value = item.value,
-                            isPlayer = uiState.selectList.contains(item),
-                            onClick = {
-                                viewModel.onClickButton(item, context)
-                            },
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        MainTopBar(onClick = viewModel::resetSound)
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 12.dp)
+                                .padding(paddingValues)
+                        ) {
+                            items(key = { index -> index.id }, items = uiState.sounds) { item ->
+                                SoundItem(
+                                    image = item.image,
+                                    value = item.value,
+                                    isPlayer = uiState.selectList.contains(item),
+                                    onClick = {
+                                        viewModel.onClickButton(item, context)
+                                    },
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        }
                     }
-                }
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    AnimatedVisibility(uiState.selectList.isNotEmpty()) {
-                        FloatingActionButton(
-                            shape = RoundedCornerShape(50),
-                            containerColor = AppColors.color.selectedColor,
+                    AnimatedVisibility(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .align(Alignment.BottomEnd),
+                        visible = uiState.selectList.isNotEmpty()
+                    ) {
+                        IconButton(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(AppColors.color.selectedColor)
+                                .padding(4.dp),
                             onClick = {
-                                if (uiState.selectList.isNotEmpty() && uiState.counter == 0)
-                                    viewModel.setSheetContent(BottomSheetContentType.Times)
-                                else viewModel.setSheetContent(BottomSheetContentType.Progress)
+                                if (uiState.minAndSec.isNotEmpty()) {
+                                    viewModel.setSheetContent(BottomSheetContentType.Progress)
+                                } else viewModel.setSheetContent(BottomSheetContentType.Times)
                                 scope.launch {
                                     bottomSheetScaffoldState.bottomSheetState.expand()
                                 }
@@ -233,7 +249,11 @@ fun TimerItem(modifier: Modifier, time: Int, onClick: () -> Unit) {
 fun TimesSheetContent(
     onShowTimer: (time: Int) -> Unit,
 ) {
-    Column(modifier = Modifier.navigationBarsPadding()) {
+    Column(
+        modifier = Modifier
+            .navigationBarsPadding()
+            .background(AppColors.color.background)
+    ) {
         Text(
             "Set Timer",
             fontSize = 18.sp,
@@ -313,22 +333,28 @@ fun SoundItem(image: Int?, value: String, isPlayer: Boolean, onClick: () -> Unit
 
 @Composable
 fun ProgressBottomSheetContent(
-    counter: Int,
+    counter: String,
     progress: Float,
-    modifier: Modifier = Modifier,
-    onDismissSheet: () -> Unit
+    onClickStop: () -> Unit
 ) {
-    val minute = counter / 60
-    val seconds = counter % 60
-    if (minute == 0 && seconds == 0) {
-        onDismissSheet()
-    }
     Box(
-        modifier = modifier
+        modifier = Modifier
+            .navigationBarsPadding()
             .height(270.dp)
+            .background(AppColors.color.background)
             .fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
+        Icon(
+            modifier = Modifier
+                .padding(end = 16.dp)
+                .align(Alignment.TopEnd)
+                .clickable { onClickStop() }
+                .padding(4.dp),
+            imageVector = Icons.Default.Close,
+            tint = AppColors.color.white,
+            contentDescription = null
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize(),
@@ -338,9 +364,10 @@ fun ProgressBottomSheetContent(
             CircularProgressIndicator(
                 modifier = Modifier.size(250.dp),
                 color = AppColors.color.selectedColor,
-                progress = { progress }
+                progress = { progress },
+                strokeCap = LinearStrokeCap
             )
         }
-        Text(text = "$minute : $seconds", color = AppColors.color.selectedColor)
+        Text(text = counter, color = AppColors.color.selectedColor)
     }
 }
