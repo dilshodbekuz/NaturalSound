@@ -130,6 +130,12 @@ class MainViewModel : ViewModel() {
             stopSound(item)
         } else playSound(context, item)
     }
+
+    fun setSheetContent(sheetContentType: BottomSheetContentType) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(sheetContentTypes = sheetContentType) }
+        }
+    }
 }
 
 @Immutable
@@ -138,5 +144,10 @@ data class UiState(
     val selectList: ImmutableList<SoundModel> = persistentListOf(),
     val counter: Int = 0,
     val progress: Float = 1f,
-    val percentage: Int = 0
+    val percentage: Int = 0,
+    val sheetContentTypes: BottomSheetContentType = BottomSheetContentType.Times
 )
+
+enum class BottomSheetContentType {
+    Times, Progress
+}

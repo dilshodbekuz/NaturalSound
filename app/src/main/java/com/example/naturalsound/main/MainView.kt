@@ -1,6 +1,8 @@
 package com.example.naturalsound.main
 
+import android.annotation.SuppressLint
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,20 +23,22 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,24 +51,40 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.naturalsound.R
 import com.example.naturalsound.composable.MainTopBar
-import com.example.naturalsound.composable.Snowflake
+import com.example.naturalsound.composable.Spacer12
 import com.example.naturalsound.composable.Spacer4
 import com.example.naturalsound.composable.Text24spBold
 import com.example.naturalsound.composable.snowfall
-import com.example.naturalsound.splash.SnowfallEffect
 import com.example.naturalsound.ui.theme.AppColors
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainView(viewModel: MainViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-    val sheetState = rememberModalBottomSheetState()
-    var showBottomSheet by remember { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = rememberStandardBottomSheetState(
+            initialValue = SheetValue.Hidden,
+            skipHiddenState = false
+        )
+    )
+
+    BackHandler {
+        scope.launch {
+            bottomSheetScaffoldState.bottomSheetState.hide()
+        }
+    }
+
     LaunchedEffect(uiState.selectList.isEmpty()) {
         if (uiState.counter != 0) {
             viewModel.timerJob?.cancel()
@@ -85,31 +105,40 @@ fun MainView(viewModel: MainViewModel) {
             .snowfall()
             .background(brush = brush)
     ) {
-        Scaffold(
+        BottomSheetScaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .systemBarsPadding(),
             containerColor = Color.Transparent,
             topBar = {
-                MainTopBar(
-                    counter = uiState.counter,
-                    progress = uiState.progress,
-                    onClick = viewModel::resetSound
-                )
+                MainTopBar(onClick = viewModel::resetSound)
             },
-            floatingActionButton = {
-                AnimatedVisibility(uiState.selectList.isNotEmpty()) {
-                    FloatingActionButton(
-                        shape = RoundedCornerShape(50),
-                        containerColor = AppColors.color.selectedColor,
-                        onClick = {
-                            showBottomSheet = true
-                        }
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(R.drawable.timer),
-                            contentDescription = null
+            sheetPeekHeight = 0.dp,
+            scaffoldState = bottomSheetScaffoldState,
+            sheetContent = {
+                when (uiState.sheetContentTypes) {
+                    BottomSheetContentType.Times -> {
+                        TimesSheetContent(
+                            onShowTimer = {
+                                viewModel.setSheetContent(BottomSheetContentType.Progress)
+                                showSheetWithoutLagging(scope, bottomSheetScaffoldState)
+                                viewModel.setTimer(it)
+                            },
+                        )
+                    }
+
+                    BottomSheetContentType.Progress -> {
+                        ProgressBottomSheetContent(
+                            counter = uiState.counter,
+                            uiState.progress,
+                            modifier = Modifier.navigationBarsPadding(),
+                            onDismissSheet = {
+                                scope.launch {
+                                    viewModel.resetSound()
+                                    viewModel.setSheetContent(BottomSheetContentType.Times)
+                                    bottomSheetScaffoldState.bottomSheetState.hide()
+                                }
+                            }
                         )
                     }
                 }
@@ -134,66 +163,44 @@ fun MainView(viewModel: MainViewModel) {
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
-                if (showBottomSheet) {
-                    ModalBottomSheet(
-                        containerColor = AppColors.color.background,
-                        onDismissRequest = {
-                            showBottomSheet = false
-                        },
-                        sheetState = sheetState
-                    ) {
-                        Column(modifier = Modifier.navigationBarsPadding()) {
-                            Text(
-                                "Set Timer",
-                                fontSize = 18.sp,
-                                color = AppColors.color.selectedColor,
-                                fontWeight = FontWeight.W700,
-                                modifier = Modifier.padding(start = 16.dp)
-                            )
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                TimerItem(
-                                    modifier = Modifier.weight(1f),
-                                    time = 5,
-                                    onClick = {
-                                        showBottomSheet = false
-                                        viewModel.setTimer(5)
-                                    }
-                                )
-                                TimerItem(
-                                    modifier = Modifier.weight(1f),
-                                    time = 15,
-                                    onClick = {
-                                        showBottomSheet = false
-                                        viewModel.setTimer(15)
-                                    }
-                                )
-                                TimerItem(
-                                    modifier = Modifier.weight(1f),
-                                    time = 30,
-                                    onClick = {
-                                        showBottomSheet = false
-                                        viewModel.setTimer(30)
-                                    }
-                                )
-                                TimerItem(
-                                    modifier = Modifier.weight(1f),
-                                    time = 60,
-                                    onClick = {
-                                        showBottomSheet = false
-                                        viewModel.setTimer(60)
-                                    }
-                                )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    AnimatedVisibility(uiState.selectList.isNotEmpty()) {
+                        FloatingActionButton(
+                            shape = RoundedCornerShape(50),
+                            containerColor = AppColors.color.selectedColor,
+                            onClick = {
+                                if (uiState.selectList.isNotEmpty() && uiState.counter == 0)
+                                    viewModel.setSheetContent(BottomSheetContentType.Times)
+                                else viewModel.setSheetContent(BottomSheetContentType.Progress)
+                                scope.launch {
+                                    bottomSheetScaffoldState.bottomSheetState.expand()
+                                }
                             }
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                painter = painterResource(R.drawable.timer),
+                                contentDescription = null
+                            )
                         }
                     }
                 }
             }
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+private fun showSheetWithoutLagging(
+    scope: CoroutineScope,
+    bottomSheetScaffoldState: BottomSheetScaffoldState
+) {
+    scope.launch {
+        bottomSheetScaffoldState.bottomSheetState.hide()
+        bottomSheetScaffoldState.bottomSheetState.expand()
     }
 }
 
@@ -219,6 +226,56 @@ fun TimerItem(modifier: Modifier, time: Int, onClick: () -> Unit) {
             color = AppColors.color.textColor,
             fontSize = 12.sp
         )
+    }
+}
+
+@Composable
+fun TimesSheetContent(
+    onShowTimer: (time: Int) -> Unit,
+) {
+    Column(modifier = Modifier.navigationBarsPadding()) {
+        Text(
+            "Set Timer",
+            fontSize = 18.sp,
+            color = AppColors.color.selectedColor,
+            fontWeight = FontWeight.W700,
+            modifier = Modifier.padding(start = 16.dp)
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            TimerItem(
+                modifier = Modifier.weight(1f),
+                time = 1,
+                onClick = {
+                    onShowTimer(1)
+                }
+            )
+            TimerItem(
+                modifier = Modifier.weight(1f),
+                time = 15,
+                onClick = {
+                    onShowTimer(15)
+                }
+            )
+            TimerItem(
+                modifier = Modifier.weight(1f),
+                time = 30,
+                onClick = {
+                    onShowTimer(30)
+                }
+            )
+            TimerItem(
+                modifier = Modifier.weight(1f),
+                time = 60,
+                onClick = {
+                    onShowTimer(60)
+                }
+            )
+        }
     }
 }
 
@@ -251,5 +308,39 @@ fun SoundItem(image: Int?, value: String, isPlayer: Boolean, onClick: () -> Unit
             textAlign = TextAlign.Center,
             color = if (isPlayer) AppColors.color.selectedColor else AppColors.color.textColor
         )
+    }
+}
+
+@Composable
+fun ProgressBottomSheetContent(
+    counter: Int,
+    progress: Float,
+    modifier: Modifier = Modifier,
+    onDismissSheet: () -> Unit
+) {
+    val minute = counter / 60
+    val seconds = counter % 60
+    if (minute == 0 && seconds == 0) {
+        onDismissSheet()
+    }
+    Box(
+        modifier = modifier
+            .height(270.dp)
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(250.dp),
+                color = AppColors.color.selectedColor,
+                progress = { progress }
+            )
+        }
+        Text(text = "$minute : $seconds", color = AppColors.color.selectedColor)
     }
 }
