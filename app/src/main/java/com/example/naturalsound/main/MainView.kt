@@ -53,6 +53,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.naturalsound.R
 import com.example.naturalsound.composable.MainTopBar
@@ -67,7 +68,10 @@ import kotlinx.coroutines.launch
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainView(viewModel: MainViewModel) {
+fun MainView(
+    viewModel: MainViewModel,
+    navController: NavController
+) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
@@ -80,8 +84,12 @@ fun MainView(viewModel: MainViewModel) {
     )
 
     BackHandler {
-        scope.launch {
-            bottomSheetScaffoldState.bottomSheetState.hide()
+        if (bottomSheetScaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+            scope.launch {
+                bottomSheetScaffoldState.bottomSheetState.hide()
+            }
+        } else {
+            navController.popBackStack()
         }
     }
 

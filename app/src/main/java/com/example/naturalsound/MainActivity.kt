@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
                         SplashScreen(navController)
                     }
                     composable("home") {
-                        MainView(viewModel)
+                        MainView(viewModel, navController)
                     }
                 }
             }
