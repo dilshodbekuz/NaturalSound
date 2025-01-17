@@ -77,10 +77,7 @@ import kotlinx.coroutines.launch
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainView(
-    viewModel: MainViewModel,
-    navController: NavController
-) {
+fun MainView(viewModel: MainViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
@@ -92,13 +89,9 @@ fun MainView(
         )
     )
 
-    BackHandler {
-        if (bottomSheetScaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-            scope.launch {
-                bottomSheetScaffoldState.bottomSheetState.hide()
-            }
-        } else {
-            navController.popBackStack()
+    BackHandler(enabled = bottomSheetScaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+        scope.launch {
+            bottomSheetScaffoldState.bottomSheetState.hide()
         }
     }
 
