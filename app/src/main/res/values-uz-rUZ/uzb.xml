@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_title">Tabiiy tovushlar</string>
+    <string name="typing">Klaviatura</string>
+    <string name="rain">Yomg`ir</string>
+    <string name="calm_rain">Sokin yomg`ir</string>
+    <string name="storm_rain">Bo`ronli yomg`ir</string>
+    <string name="water_full">Sharshara</string>
+    <string name="calm_river">Sokin yomg`ir</string>
+    <string name="mountain_river">To`g daryosi</string>
+    <string name="ocaen">Dengiz</string>
+    <string name="drip">Tomchi</string>
+    <string name="fire">Olov</string>
+    <string name="storm">Bo`ron</string>
+    <string name="thunder">Chaqmoq</string>
+    <string name="peals_of_thunder">Momaqaldiroq</string>
+    <string name="rain_thunder">Chaqmoqli yom`gir</string>
+    <string name="rain_thunder_wind">Yomg`irli bo`ron</string>
+    <string name="wind">Shamol</string>
+    <string name="strong_wind">Kuchli shamol</string>
+    <string name="calm_forest">Sokin o`rmon</string>
+    <string name="jungle">O`rmon</string>
+    <string name="orphean">Orphean</string>
+    <string name="erithacus_rebecula_bird">Erithacus Rebecula (qush)</string>
+    <string name="bird">Sokin qush ovozi</string>
+    <string name="greater_hoopoe">Greater Hoopoe (qush)</string>
+    <string name="hermit_thrush">Hermit Thrush (qush)</string>
+    <string name="indian_malabar">Indian Malabar (qush)</string>
+    <string name="birds_frogs">Qushlar va qurbaqalar</string>
+    <string name="olive_whistler">Olive Whistler (qush)</string>
+    <string name="pied_butcherbird">Pied Butcherbird (qush)</string>
+    <string name="woodlark">Woodlark (qush)</string>
+    <string name="birds">Qushlar Galasi</string>
+    <string name="english">Ingliz tili</string>
+    <string name="russian">Rus tili</string>
+    <string name="uzbek">O`zbek tili</string>
+</resources>

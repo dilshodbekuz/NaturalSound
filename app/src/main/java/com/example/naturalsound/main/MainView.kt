@@ -1,7 +1,7 @@
 package com.example.naturalsound.main
 
 import android.annotation.SuppressLint
-import android.util.Log
+import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -15,37 +15,42 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ProgressIndicatorDefaults.LinearStrokeCap
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,23 +61,23 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.naturalsound.R
-import com.example.naturalsound.composable.MainTopBar
-import com.example.naturalsound.composable.Spacer12
-import com.example.naturalsound.composable.Spacer16
 import com.example.naturalsound.composable.Spacer4
+import com.example.naturalsound.composable.Text16spBold
 import com.example.naturalsound.composable.Text24spBold
 import com.example.naturalsound.composable.snowfall
 import com.example.naturalsound.ui.theme.AppColors
+import com.example.naturalsound.utils.Constants
+import com.example.naturalsound.utils.LanguageHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlin.math.min
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,7 +85,8 @@ import kotlinx.coroutines.launch
 fun MainView(viewModel: MainViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-
+    val preferences = context.getSharedPreferences(Constants.PREFERENCE_NAME, Context.MODE_PRIVATE)
+    val currentLanguage = preferences.getString(Constants.LANGUAGE_KEY, Constants.Languages.ENG)
     val scope = rememberCoroutineScope()
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -124,6 +130,35 @@ fun MainView(viewModel: MainViewModel) {
             sheetPeekHeight = 0.dp,
             scaffoldState = bottomSheetScaffoldState,
             sheetContainerColor = AppColors.color.background,
+            topBar = {
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = AppColors.color.darkColor
+                    ),
+                    title = { Text24spBold(text = stringResource(R.string.app_name_title)) },
+                    actions = {
+                        AppbarActionsView(
+                            expandedState = uiState.menuVisibility,
+                            currentLanguage = currentLanguage!!,
+                            onMenuItemClick = { languageCode ->
+                                preferences.edit().putString(Constants.LANGUAGE_KEY, languageCode).apply()
+                                LanguageHelper.changeLanguage(
+                                    context = context,
+                                    resources = context.resources,
+                                    languageCode = languageCode
+                                )
+                                viewModel.onMenuVisibilityChange(
+                                    uiState.menuVisibility.not()
+                                )
+                            },
+                            onDismissMenu = { viewModel.onMenuVisibilityChange(uiState.menuVisibility.not()) },
+                            onMenuClick = {
+                                viewModel.onMenuVisibilityChange(uiState.menuVisibility.not())
+                            }
+                        )
+                    }
+                )
+            },
             sheetContent = {
                 when (uiState.sheetContentTypes) {
                     BottomSheetContentType.Times -> {
@@ -156,7 +191,6 @@ fun MainView(viewModel: MainViewModel) {
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        MainTopBar(onClick = viewModel::resetSound)
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
                             modifier = Modifier
@@ -208,6 +242,30 @@ fun MainView(viewModel: MainViewModel) {
             }
         )
     }
+}
+
+@Composable
+fun AppbarActionsView(
+    onMenuClick: () -> Unit,
+    expandedState: Boolean = false,
+    onDismissMenu: () -> Unit,
+    onMenuItemClick: (String) -> Unit,
+    currentLanguage: String
+) {
+    IconButton(onClick = onMenuClick) {
+        Icon(
+            modifier = Modifier.size(30.dp),
+            imageVector = if (expandedState) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+            tint = AppColors.color.white,
+            contentDescription = null
+        )
+    }
+    LanguageMenuItems(
+        expandedState = expandedState,
+        onDismiss = onDismissMenu,
+        onItemClick = onMenuItemClick,
+        currentLanguage = currentLanguage
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -301,7 +359,7 @@ fun TimesSheetContent(
 }
 
 @Composable
-fun SoundItem(image: Int?, value: String, isPlayer: Boolean, onClick: () -> Unit) {
+fun SoundItem(image: Int?, value: Int, isPlayer: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .padding(8.dp)
@@ -325,7 +383,7 @@ fun SoundItem(image: Int?, value: String, isPlayer: Boolean, onClick: () -> Unit
         )
         Text24spBold(
             modifier = Modifier.align(Alignment.Center),
-            text = value,
+            text = stringResource(value),
             textAlign = TextAlign.Center,
             color = if (isPlayer) AppColors.color.selectedColor else AppColors.color.textColor
         )
@@ -370,5 +428,60 @@ fun ProgressBottomSheetContent(
             )
         }
         Text(text = counter, color = AppColors.color.selectedColor)
+    }
+}
+
+@Composable
+fun LanguageMenuItems(
+    onItemClick: (String) -> Unit,
+    expandedState: Boolean = false,
+    onDismiss: () -> Unit = {},
+    currentLanguage: String
+) {
+    DropdownMenu(
+        modifier = Modifier.background(Color.Transparent),
+        expanded = expandedState,
+        onDismissRequest = onDismiss
+    ) {
+        LanguageMenuItem(
+            onClick = { onItemClick(Constants.Languages.ENG) },
+            text = stringResource(R.string.english),
+            isChoosen = currentLanguage == Constants.Languages.ENG
+        )
+        LanguageMenuItem(
+            onClick = { onItemClick(Constants.Languages.RUS) },
+            text = stringResource(R.string.russian),
+            isChoosen = currentLanguage == Constants.Languages.RUS
+        )
+        LanguageMenuItem(
+            onClick = { onItemClick(Constants.Languages.UZB) },
+            text = stringResource(R.string.uzbek),
+            isChoosen = currentLanguage == Constants.Languages.UZB
+        )
+    }
+}
+
+@Composable
+fun LanguageMenuItem(
+    onClick: () -> Unit,
+    text: String,
+    isChoosen: Boolean = false
+) {
+    Row(
+        modifier = Modifier
+            .widthIn(min = 130.dp)
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp, horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = text, color = AppColors.color.darkColor, fontSize = 16.sp)
+        Spacer(modifier = Modifier.weight(1f))
+        if (isChoosen) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                tint = AppColors.color.darkColor
+            )
+        }
     }
 }

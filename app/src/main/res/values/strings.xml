@@ -1,3 +1,37 @@
 <resources>
-    <string name="app_name">NaturalSound</string>
+    <string name="app_name" translatable="false">NaturalSound</string>
+    <string name="app_name_title">Natural Sounds</string>
+    <string name="typing">Typing</string>
+    <string name="rain">Rain</string>
+    <string name="calm_rain">Calm Rain</string>
+    <string name="storm_rain">Storm and Rain</string>
+    <string name="water_full">Water Full</string>
+    <string name="calm_river">Calm River</string>
+    <string name="mountain_river">Mountain River</string>
+    <string name="ocaen">Ocean</string>
+    <string name="drip">Drip</string>
+    <string name="fire">Fire</string>
+    <string name="storm">Storm</string>
+    <string name="thunder">Thunder</string>
+    <string name="peals_of_thunder">Peals of Thunder</string>
+    <string name="rain_thunder">Rain and Thunder</string>
+    <string name="rain_thunder_wind">Rain Thunder Wind mixed</string>
+    <string name="wind">Wind</string>
+    <string name="strong_wind">Strong Wind</string>
+    <string name="calm_forest">Calm Forest</string>
+    <string name="jungle">Jungle</string>
+    <string name="orphean">Orphean</string>
+    <string name="erithacus_rebecula_bird">Erithacus Rebecula</string>
+    <string name="bird">Pure Bird</string>
+    <string name="greater_hoopoe">Greater Hoopoe</string>
+    <string name="hermit_thrush">Hermit Thrush</string>
+    <string name="indian_malabar">Indian Malabar</string>
+    <string name="birds_frogs">Birds and Frogs</string>
+    <string name="olive_whistler">Olive Whistler</string>
+    <string name="pied_butcherbird">Pied Butcherbird</string>
+    <string name="woodlark">Woodlark</string>
+    <string name="birds">Birds</string>
+    <string name="english">English</string>
+    <string name="russian">Russian</string>
+    <string name="uzbek">Uzbek</string>
 </resources>

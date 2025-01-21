@@ -27,6 +27,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.naturalsound.R
@@ -67,7 +68,7 @@ fun SplashScreen(navController: NavController) {
             tint = AppColors.color.white
         )
         Spacer16()
-        Text24spBold(text = "Natural Sounds")
+        Text24spBold(text = stringResource(R.string.app_name))
     }
 }
 
