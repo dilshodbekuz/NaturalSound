@@ -8,8 +8,12 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,14 +35,35 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         manageAppLanguage()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                0
-            )
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//            ActivityCompat.requestPermissions(
+//                this,
+//                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+//                0
+//            )
+//        }
         setContent {
+            val context = LocalContext.current
+            val permissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission(),
+                onResult = { isGranted ->
+                    if (isGranted) {
+//                        sendNotification(context)
+                    } else {
+                        // Handle permission denial
+                    }
+                }
+            )
+            LaunchedEffect(Unit) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED
+                ) {
+                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    // If the permission is already granted, send a notification
+//                    sendNotification(context)
+                }
+            }
             viewModel = viewModel()
             val navController = rememberNavController()
             NaturalSoundTheme {
@@ -50,7 +75,7 @@ class MainActivity : ComponentActivity() {
                         SplashScreen(navController)
                     }
                     composable("home") {
-                        MainView(viewModel)
+                        MainView(viewModel, onClickBack = { })
                     }
                 }
             }

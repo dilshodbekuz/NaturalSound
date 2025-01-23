@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -38,6 +39,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButtonElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ProgressIndicatorDefaults.LinearStrokeCap
@@ -68,6 +70,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.naturalsound.R
+import com.example.naturalsound.composable.MainTopBar
+import com.example.naturalsound.composable.Spacer16
 import com.example.naturalsound.composable.Spacer4
 import com.example.naturalsound.composable.Text16spBold
 import com.example.naturalsound.composable.Text24spBold
@@ -82,7 +86,7 @@ import kotlin.math.min
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainView(viewModel: MainViewModel) {
+fun MainView(viewModel: MainViewModel, onClickBack: () -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val preferences = context.getSharedPreferences(Constants.PREFERENCE_NAME, Context.MODE_PRIVATE)
@@ -130,35 +134,6 @@ fun MainView(viewModel: MainViewModel) {
             sheetPeekHeight = 0.dp,
             scaffoldState = bottomSheetScaffoldState,
             sheetContainerColor = AppColors.color.background,
-            topBar = {
-                TopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = AppColors.color.darkColor
-                    ),
-                    title = { Text24spBold(text = stringResource(R.string.app_name_title)) },
-                    actions = {
-                        AppbarActionsView(
-                            expandedState = uiState.menuVisibility,
-                            currentLanguage = currentLanguage!!,
-                            onMenuItemClick = { languageCode ->
-                                preferences.edit().putString(Constants.LANGUAGE_KEY, languageCode).apply()
-                                LanguageHelper.changeLanguage(
-                                    context = context,
-                                    resources = context.resources,
-                                    languageCode = languageCode
-                                )
-                                viewModel.onMenuVisibilityChange(
-                                    uiState.menuVisibility.not()
-                                )
-                            },
-                            onDismissMenu = { viewModel.onMenuVisibilityChange(uiState.menuVisibility.not()) },
-                            onMenuClick = {
-                                viewModel.onMenuVisibilityChange(uiState.menuVisibility.not())
-                            }
-                        )
-                    }
-                )
-            },
             sheetContent = {
                 when (uiState.sheetContentTypes) {
                     BottomSheetContentType.Times -> {
@@ -191,6 +166,7 @@ fun MainView(viewModel: MainViewModel) {
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
+                        MainTopBar(onClick = onClickBack)
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
                             modifier = Modifier
@@ -217,24 +193,28 @@ fun MainView(viewModel: MainViewModel) {
                             .align(Alignment.BottomEnd),
                         visible = uiState.selectList.isNotEmpty()
                     ) {
-                        IconButton(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .background(AppColors.color.selectedColor)
-                                .padding(4.dp),
-                            onClick = {
-                                if (uiState.minAndSec.isNotEmpty()) {
-                                    viewModel.setSheetContent(BottomSheetContentType.Progress)
-                                } else viewModel.setSheetContent(BottomSheetContentType.Times)
-                                scope.launch {
-                                    bottomSheetScaffoldState.bottomSheetState.expand()
-                                }
-                            }
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Icon(
-                                modifier = Modifier.size(24.dp),
-                                painter = painterResource(R.drawable.timer),
-                                contentDescription = null
+                            FloatingActionButton(
+                                icon = R.drawable.stop_img,
+                                backgroundColor = Color.Red,
+                                size = 40,
+                                onClick = viewModel::resetSound
+                            )
+                            Spacer16()
+                            FloatingActionButton(
+                                icon = R.drawable.timer,
+                                padding = 12,
+                                onClick = {
+                                    if (uiState.minAndSec.isNotEmpty()) {
+                                        viewModel.setSheetContent(BottomSheetContentType.Progress)
+                                    } else viewModel.setSheetContent(BottomSheetContentType.Times)
+                                    scope.launch {
+                                        bottomSheetScaffoldState.bottomSheetState.expand()
+                                    }
+                                }
                             )
                         }
                     }
@@ -242,6 +222,26 @@ fun MainView(viewModel: MainViewModel) {
             }
         )
     }
+}
+
+@Composable
+fun FloatingActionButton(
+    icon: Int,
+    backgroundColor: Color = AppColors.color.selectedColor,
+    padding: Int = 0,
+    size: Int = 24,
+    onClick: () -> Unit
+) {
+    Image(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(backgroundColor)
+            .clickable { onClick() }
+            .padding(padding.dp)
+            .size(size.dp),
+        painter = painterResource(icon),
+        contentDescription = null
+    )
 }
 
 @Composable
@@ -328,9 +328,9 @@ fun TimesSheetContent(
         ) {
             TimerItem(
                 modifier = Modifier.weight(1f),
-                time = 1,
+                time = 5,
                 onClick = {
-                    onShowTimer(1)
+                    onShowTimer(5)
                 }
             )
             TimerItem(
