@@ -88,13 +88,20 @@ class MainActivity : ComponentActivity() {
         stopService(serviceIntent)
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onPause() {
+        super.onPause()
         if (viewModel.uiState.value.selectList.isNotEmpty()) {
             val serviceIntent = Intent(this, MyForegroundService::class.java)
             ContextCompat.startForegroundService(this, serviceIntent)
         }
     }
+//    override fun onStop() {
+//        super.onStop()
+//        if (viewModel.uiState.value.selectList.isNotEmpty()) {
+//            val serviceIntent = Intent(this, MyForegroundService::class.java)
+//            ContextCompat.startForegroundService(this, serviceIntent)
+//        }
+//    }
 
     override fun onDestroy() {
         super.onDestroy()
