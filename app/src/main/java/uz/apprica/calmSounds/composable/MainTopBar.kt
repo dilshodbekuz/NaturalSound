@@ -24,7 +24,7 @@ fun MainTopBar(onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                "Natural Sound",
+                "Calm Sounds",
                 color = AppColors.color.textColor,
                 fontWeight = FontWeight.W700,
                 fontSize = 24.sp
