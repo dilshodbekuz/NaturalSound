@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.naturalsound"
+    namespace = "uz.apprica.calmSounds"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.naturalsound"
+        applicationId = "uz.apprica.calmSounds"
         minSdk = 24
         //noinspection OldTargetApi
         targetSdk = 34
