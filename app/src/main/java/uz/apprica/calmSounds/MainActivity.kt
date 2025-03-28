@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -30,6 +31,7 @@ import javax.inject.Inject
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
+
     //    private lateinit var preferences: SharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,7 +67,16 @@ class MainActivity : ComponentActivity() {
                         SplashScreen(navController)
                     }
                     composable("home") {
-                        MainView(viewModel, onClickBack = { })
+                        MainView(
+                            viewModel = viewModel,
+                            onClickBack = {
+                                val intent = Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://www.freeprivacypolicy.com/live/ccfd6657-014c-4718-ba6b-b7825c6588de")
+                                )
+                                context.startActivity(intent)
+                            }
+                        )
                     }
                 }
             }
