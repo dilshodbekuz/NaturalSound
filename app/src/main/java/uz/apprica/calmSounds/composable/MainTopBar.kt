@@ -30,20 +30,7 @@ fun MainTopBar(onClick: () -> Unit) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                "Calm Sounds",
-                color = AppColors.color.textColor,
-                fontWeight = FontWeight.W700,
-                fontSize = 24.sp
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = onClick) {
-                Icon(
-                    imageVector = Icons.Default.Email,
-                    contentDescription = null,
-                    tint = Color.White
-                )
-            }
+
         }
         Spacer4()
     }

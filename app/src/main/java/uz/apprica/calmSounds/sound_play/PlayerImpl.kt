@@ -7,6 +7,7 @@ class PlayerImpl : Player {
 
 
     override fun playSound(mediaPlayer: MediaPlayer) {
+        mediaPlayer.release()
         mediaPlayers.add(mediaPlayer)
     }
 

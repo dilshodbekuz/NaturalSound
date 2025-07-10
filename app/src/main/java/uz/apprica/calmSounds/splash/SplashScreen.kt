@@ -53,7 +53,7 @@ fun SplashScreen(navController: NavController) {
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.ic_music_), // Replace with your app logo
+            painter = painterResource(id = R.drawable.ic_music), // Replace with your app logo
             contentDescription = null,
             modifier = Modifier.size(100.dp),
             tint = AppColors.color.white

@@ -1,7 +1,8 @@
-package uz.apprica.calmSounds.main
+package uz.apprica.calmSounds.home
 
 import android.annotation.SuppressLint
-import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -62,25 +63,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import uz.apprica.calmSounds.composable.MainTopBar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import uz.apprica.calmSounds.R
 import uz.apprica.calmSounds.composable.Spacer16
 import uz.apprica.calmSounds.composable.Spacer4
 import uz.apprica.calmSounds.composable.Text24spBold
 import uz.apprica.calmSounds.composable.snowfall
 import uz.apprica.calmSounds.ui.theme.AppColors
 import uz.apprica.calmSounds.utils.Constants
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import uz.apprica.calmSounds.R
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainView(viewModel: MainViewModel, onClickBack: () -> Unit) {
+fun MainScreen(viewModel: MainScreenModel) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-    val preferences = context.getSharedPreferences(Constants.PREFERENCE_NAME, Context.MODE_PRIVATE)
-    val currentLanguage = preferences.getString(Constants.LANGUAGE_KEY, Constants.Languages.ENG)
     val scope = rememberCoroutineScope()
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -92,6 +90,12 @@ fun MainView(viewModel: MainViewModel, onClickBack: () -> Unit) {
     BackHandler(enabled = bottomSheetScaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
         scope.launch {
             bottomSheetScaffoldState.bottomSheetState.hide()
+        }
+    }
+    LaunchedEffect(Unit) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.freeprivacypolicy.com/"))
+        if (intent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(intent)
         }
     }
 
@@ -156,7 +160,12 @@ fun MainView(viewModel: MainViewModel, onClickBack: () -> Unit) {
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        MainTopBar(onClick = onClickBack)
+                        Text(
+                            "Calm Sounds",
+                            color = AppColors.color.textColor,
+                            fontWeight = FontWeight.W700,
+                            fontSize = 24.sp
+                        )
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
                             modifier = Modifier
@@ -349,7 +358,7 @@ fun TimesSheetContent(
 }
 
 @Composable
-fun SoundItem(image: Int?, value: Int, isPlayer: Boolean, onClick: () -> Unit) {
+fun SoundItem(image: String, value: String, isPlayer: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .padding(8.dp)
@@ -373,7 +382,7 @@ fun SoundItem(image: Int?, value: Int, isPlayer: Boolean, onClick: () -> Unit) {
         )
         Text24spBold(
             modifier = Modifier.align(Alignment.Center),
-            text = stringResource(value),
+            text = value,
             textAlign = TextAlign.Center,
             color = if (isPlayer) AppColors.color.selectedColor else AppColors.color.textColor
         )

@@ -53,6 +53,9 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.storage)
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.firestore)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -69,4 +72,5 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.coil.compose)
     implementation(libs.kotlinx.collections.immutable)
+    implementation ("com.google.firebase:firebase-database:21.0.0")
 }

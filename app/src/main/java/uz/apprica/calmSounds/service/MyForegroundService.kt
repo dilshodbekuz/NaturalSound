@@ -51,7 +51,7 @@ class MyForegroundService : Service(),LifecycleObserver {
 //            .setAutoCancel(true)
             .setContentTitle("Sounds is running...")
             .setContentText("The service is running in the background.")
-            .setSmallIcon(R.drawable.ic_music_)
+            .setSmallIcon(R.drawable.ic_music)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(
                 PendingIntent.getActivity(
