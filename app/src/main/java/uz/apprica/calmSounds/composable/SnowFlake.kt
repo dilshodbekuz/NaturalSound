@@ -153,7 +153,7 @@ internal data class SnowflakesState(
                 canvasSize = canvasSize,
                 position = randomStartingPosition(canvasSize),
                 angle = angleSeed.randomAngle(),
-                drawableIndex = Random.nextInt(2),
+                drawableIndex = Random.nextInt(3),
                 rotation = Random.nextFloat() * 360f,
             )
         }

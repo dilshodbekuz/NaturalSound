@@ -23,7 +23,7 @@ fun Spacer12() {
 
 @Composable
 fun Spacer16() {
-    Spacer(modifier = Modifier.size(8.dp))
+    Spacer(modifier = Modifier.size(16.dp))
 }
 
 @Composable

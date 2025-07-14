@@ -20,7 +20,7 @@ object AppModule {
             context,
             Database::class.java,
             "my_database"
-        ).build()
+        ).fallbackToDestructiveMigration().build()
 
     @Provides
     fun provideUserDao(db: Database): SoundDao = db.soundDao()
