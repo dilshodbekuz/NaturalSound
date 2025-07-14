@@ -8,56 +8,78 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.collections.immutable.ImmutableList
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uz.apprica.calmSounds.base.resultOf
+import uz.apprica.calmSounds.db.SoundDao
+import uz.apprica.calmSounds.db.SoundEntity
 import uz.apprica.calmSounds.sound_play.Player
 import uz.apprica.calmSounds.sound_play.PlayerImpl
+import javax.inject.Inject
 
 const val name = "name"
 const val id = "id"
 const val sound = "sound"
 const val image = "image"
 
-class MainScreenModel : ViewModel() {
+@HiltViewModel
+class MainScreenModel @Inject constructor(
+    private val soundDao: SoundDao
+) : ViewModel() {
 
     private val player: Player by lazy { PlayerImpl() }
     private var mediaPlayerList = HashMap<String, MediaPlayer>()
 
-    private val db = FirebaseFirestore.getInstance()
-
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
-    var timerJob: Job? = null
-    var job: Job? = null
+    private val firebase = FirebaseFirestore.getInstance()
 
     init {
-        getSounds()
+        setSounds()
     }
 
-    private fun getSounds() {
-        db.collection("sounds")
+    fun getSounds() {
+        viewModelScope.launch {
+            soundDao.getAllSounds().collect { soundList ->
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        sounds = soundList.map { sound ->
+                            SoundModel(
+                                id = sound.id,
+                                value = sound.name,
+                                sound = sound.sound,
+                                image = sound.image
+                            )
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    private fun setSounds() {
+        firebase.collection("sounds")
             .get()
             .addOnSuccessListener { result ->
-                val productList = mutableListOf<SoundModel>()
                 result.forEach { document ->
-                    val a = SoundModel(
-                        id = document.id,
-                        value = document.getString(name) ?: "",
-                        sound = document.getString(sound) ?: "",
-                        image = document.getString(image) ?: ""
+                    addUser(
+                        SoundEntity(
+                            id = document.get("id").toString(),
+                            name = document.getString(name) ?: "",
+                            sound = document.getString(sound) ?: "",
+                            image = document.getString(image) ?: ""
+                        )
                     )
-                    productList.add(a)
-                    _uiState.update { it.copy(sounds = productList.toPersistentList()) }
                 }
             }
             .addOnFailureListener { exception ->
@@ -65,10 +87,14 @@ class MainScreenModel : ViewModel() {
             }
     }
 
+    private fun addUser(user: SoundEntity) {
+        viewModelScope.launch {
+            soundDao.insertSound(user)
+        }
+    }
+
     private fun playSound(context: Context, item: SoundModel) {
-        job?.cancel()
-        job = null
-        job = viewModelScope.launch {
+        viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _uiState.update { it.copy(selectList = uiState.value.selectList + item) }
                 val mediaPlayer = MediaPlayer.create(context, item.sound.toUri()).apply {
@@ -102,10 +128,6 @@ class MainScreenModel : ViewModel() {
 
     fun resetSound() {
         try {
-            job?.cancel()
-            job = null
-            timerJob?.cancel()
-            timerJob = null
             player.resetSound()
             _uiState.update {
                 it.copy(
@@ -116,17 +138,12 @@ class MainScreenModel : ViewModel() {
                 )
             }
         } catch (e: IllegalStateException) {
-            job?.cancel()
-            job = null
-            timerJob?.cancel()
-            timerJob = null
         }
     }
 
     fun setTimer(timer: Int, isResound: Boolean = true) {
         _uiState.update { it.copy(progress = 1f) }
-        timerJob?.cancel()
-        timerJob = viewModelScope.launch {
+        viewModelScope.launch {
             if (uiState.value.counter == 0) _uiState.update { it.copy(counter = timer) }
             var stepTime = timer * 60
             while (stepTime >= 1) {
@@ -162,8 +179,8 @@ class MainScreenModel : ViewModel() {
 
 @Immutable
 data class UiState(
-    val sounds: ImmutableList<SoundModel> = persistentListOf(),
-    val selectList: List<SoundModel> = persistentListOf(),
+    val sounds: List<SoundModel> = emptyList(),
+    val selectList: List<SoundModel> = emptyList(),
     val counter: Int = 0,
     val minAndSec: String = "",
     val progress: Float = 1f,

@@ -9,21 +9,21 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import dagger.hilt.android.AndroidEntryPoint
 import uz.apprica.calmSounds.home.MainScreen
-import uz.apprica.calmSounds.home.MainScreenModel
 import uz.apprica.calmSounds.service.MyForegroundService
 import uz.apprica.calmSounds.splash.SplashScreen
 import uz.apprica.calmSounds.ui.theme.NaturalSoundTheme
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel: MainScreenModel by viewModels()
+//    private val viewModel: MainScreenModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
                         SplashScreen(navController)
                     }
                     composable("home") {
-                        MainScreen(viewModel = viewModel,)
+                        MainScreen(viewModel = hiltViewModel())
                     }
                 }
             }
@@ -64,20 +64,20 @@ class MainActivity : ComponentActivity() {
         stopService(serviceIntent)
     }
 
-    override fun onPause() {
-        super.onPause()
-        if (viewModel.uiState.value.selectList.isNotEmpty()) {
-            val serviceIntent = Intent(this, MyForegroundService::class.java)
-            ContextCompat.startForegroundService(this, serviceIntent)
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.resetSound()
-        val serviceIntent = Intent(this, MyForegroundService::class.java)
-        stopService(serviceIntent)
-    }
+//    override fun onPause() {
+//        super.onPause()
+//        if (viewModel.uiState.value.selectList.isNotEmpty()) {
+//            val serviceIntent = Intent(this, MyForegroundService::class.java)
+//            ContextCompat.startForegroundService(this, serviceIntent)
+//        }
+//    }
+//
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        viewModel.resetSound()
+//        val serviceIntent = Intent(this, MyForegroundService::class.java)
+//        stopService(serviceIntent)
+//    }
 }
 
 

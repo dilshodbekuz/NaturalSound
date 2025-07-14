@@ -1,8 +1,6 @@
 package uz.apprica.calmSounds.home
 
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -86,27 +84,23 @@ fun MainScreen(viewModel: MainScreenModel) {
             skipHiddenState = false
         )
     )
-
-    BackHandler(enabled = bottomSheetScaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-        scope.launch {
-            bottomSheetScaffoldState.bottomSheetState.hide()
-        }
-    }
     LaunchedEffect(Unit) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.freeprivacypolicy.com/"))
-        if (intent.resolveActivity(context.packageManager) != null) {
-            context.startActivity(intent)
-        }
+        viewModel.getSounds()
     }
 
     LaunchedEffect(uiState.selectList.isEmpty()) {
         bottomSheetScaffoldState.bottomSheetState.hide()
         if (uiState.counter != 0) {
-            viewModel.timerJob?.cancel()
             viewModel.setTimer(0)
             viewModel.setSheetContent(BottomSheetContentType.Times)
         }
     }
+    BackHandler(enabled = bottomSheetScaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+        scope.launch {
+            bottomSheetScaffoldState.bottomSheetState.hide()
+        }
+    }
+
     val brush =
         Brush.verticalGradient(
             listOf(
