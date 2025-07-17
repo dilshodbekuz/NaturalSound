@@ -67,6 +67,7 @@ import uz.apprica.calmSounds.R
 import uz.apprica.calmSounds.composable.Spacer16
 import uz.apprica.calmSounds.composable.Spacer4
 import uz.apprica.calmSounds.composable.Text24spBold
+import uz.apprica.calmSounds.composable.multipleEventsCutter
 import uz.apprica.calmSounds.composable.snowfall
 import uz.apprica.calmSounds.ui.theme.AppColors
 import uz.apprica.calmSounds.utils.Constants
@@ -353,33 +354,35 @@ fun TimesSheetContent(
 
 @Composable
 fun SoundItem(image: String, value: String, isPlayer: Boolean, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .padding(8.dp)
-            .clip(RoundedCornerShape(18.dp))
-            .size(100.dp)
-            .clickable { onClick() }
-    ) {
-        AsyncImage(
-            model = image,
-            contentDescription = null,
-            placeholder = painterResource(R.drawable.download),
+    multipleEventsCutter { manager ->
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer(alpha = 0.7f)
-                .border(
-                    width = 2.dp,
-                    shape = RoundedCornerShape(18.dp),
-                    color = if (isPlayer) AppColors.color.selectedColor else Color.Transparent
-                ),
-            contentScale = ContentScale.Crop
-        )
-        Text24spBold(
-            modifier = Modifier.align(Alignment.Center),
-            text = value,
-            textAlign = TextAlign.Center,
-            color = if (isPlayer) AppColors.color.selectedColor else AppColors.color.textColor
-        )
+                .padding(8.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .size(100.dp)
+                .clickable { manager.processEvent { onClick() } }
+        ) {
+            AsyncImage(
+                model = image,
+                contentDescription = null,
+                placeholder = painterResource(R.drawable.download),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer(alpha = 0.7f)
+                    .border(
+                        width = 2.dp,
+                        shape = RoundedCornerShape(18.dp),
+                        color = if (isPlayer) AppColors.color.selectedColor else Color.Transparent
+                    ),
+                contentScale = ContentScale.Crop
+            )
+            Text24spBold(
+                modifier = Modifier.align(Alignment.Center),
+                text = value,
+                textAlign = TextAlign.Center,
+                color = if (isPlayer) AppColors.color.selectedColor else AppColors.color.textColor
+            )
+        }
     }
 }
 
