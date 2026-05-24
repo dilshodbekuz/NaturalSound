@@ -73,15 +73,14 @@ class SoundPlayerService : Service() {
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build()
             )
-            // ── Assets yoki HTTP URL ──────────────────────────────────────
+            // ── Assets (OGG) yoki HTTP URL ───────────────────────────────
             if (url.startsWith("sounds/")) {
                 try {
                     val afd = this@SoundPlayerService.assets.openFd(url)
                     setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
                     afd.close()
-                    Log.d("SoundPlayer", "Assets dan o'qilmoqda: $url")
                 } catch (e: Exception) {
-                    Log.e("SoundPlayer", "Assets xato: ${e.message}")
+                    Log.e("SoundPlayer", "Assets xato: $url — ${e.message}")
                     return@apply
                 }
             } else {

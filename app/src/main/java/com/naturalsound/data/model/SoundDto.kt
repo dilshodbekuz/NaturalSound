@@ -24,17 +24,11 @@ private fun mapCategory(raw: String): SoundCategory = when (raw.lowercase()) {
     else                 -> SoundCategory.ALL
 }
 
-fun SoundDto.toDomain(
-    isFavorite: Boolean = false,
-    localPath: String? = null
-): Sound = Sound(
-    id                 = id,
-    name               = name,
-    category           = mapCategory(category),
-    firebaseUrl        = url,   // assets path: "sounds/rain_1_soft.mp3"
-    localPath          = localPath,
-    emoji              = emoji,
-    isFavorite         = isFavorite,
-    isOfflineAvailable = localPath != null,
-    tags               = tags
+fun SoundDto.toDomain(): Sound = Sound(
+    id          = id,
+    name        = name,
+    category    = mapCategory(category),
+    firebaseUrl = url,
+    emoji       = emoji,
+    tags        = tags
 )

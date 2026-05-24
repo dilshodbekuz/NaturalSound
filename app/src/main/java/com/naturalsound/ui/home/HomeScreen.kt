@@ -87,15 +87,11 @@ fun HomeScreen(
             // Soundlar
             items(uiState.sounds, key = { it.id }, span = { GridItemSpan(1) }) { sound ->
                 SoundCard(
-                    emoji        = sound.emoji,
-                    name         = sound.name,
-                    subLabel     = buildSubLabel(sound),
-                    isPlaying    = sound.id in uiState.activeSoundIds,
-                    isFavorite   = sound.isFavorite,
-                    isDownloaded = sound.isDownloaded,
-                    onTap        = { onToggleSound(sound) },
-                    onFavoriteTap = { viewModel.toggleFavorite(sound) },
-//                    modifier     = Modifier.animateItem()
+                    emoji     = sound.emoji,
+                    name      = sound.name,
+                    subLabel  = sound.category.label,
+                    isPlaying = sound.id in uiState.activeSoundIds,
+                    onTap     = { onToggleSound(sound) },
                 )
             }
             // Error state
@@ -175,8 +171,3 @@ private fun EmptyState(query: String) {
     }
 }
 
-private fun buildSubLabel(sound: Sound) = buildString {
-    append(sound.category.label)
-    if (sound.durationMinutes > 0) append(" · ${sound.durationMinutes} min")
-    if (sound.isDownloaded) append(" · Offline")
-}

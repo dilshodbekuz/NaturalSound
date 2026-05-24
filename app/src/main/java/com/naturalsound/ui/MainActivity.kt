@@ -63,7 +63,7 @@ class MainActivity : ComponentActivity() {
                     activeSoundIds   = ids,
                     activeSoundNames = names,
                     currentVolumes   = volumes,
-                    onToggleSound    = { s -> if (svc?.isPlaying(s.id) == true) svc?.stopSound(s.id) else svc?.playSound(s.id, s.name, s.playbackUrl) },
+                    onToggleSound    = { s -> if (svc?.isPlaying(s.id) == true) svc?.stopSound(s.id) else svc?.playSound(s.id, s.name, s.firebaseUrl) },
                     onStopSound      = { id -> svc?.stopSound(id) },
                     onPauseAll       = { svc?.pauseAllSounds() },
                     onResumeAll      = { svc?.resumeAllSounds() },

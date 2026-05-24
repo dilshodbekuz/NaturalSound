@@ -4,8 +4,6 @@ import com.naturalsound.domain.model.Sound
 import com.naturalsound.domain.model.SoundCategory
 import com.naturalsound.domain.repository.SoundRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -28,13 +26,5 @@ class GetSoundsUseCase @Inject constructor(
                 it.category.label.contains(searchQuery, ignoreCase = true)
             }
         }
-    }
-}
-
-class ToggleFavoriteUseCase @Inject constructor(
-    private val repository: SoundRepository
-) {
-    suspend operator fun invoke(soundId: String, isFavorite: Boolean) {
-        repository.toggleFavorite(soundId, isFavorite)
     }
 }

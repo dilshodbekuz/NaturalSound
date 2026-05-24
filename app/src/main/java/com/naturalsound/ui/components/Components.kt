@@ -108,42 +108,30 @@ fun SoundCard(
     name: String,
     subLabel: String,
     isPlaying: Boolean,
-    isFavorite: Boolean,
-    isDownloaded: Boolean,
     onTap: () -> Unit,
-    onFavoriteTap: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val borderColor by animateColorAsState(if (isPlaying) Indigo else BgBorder, label = "bc")
-    val bgColor by animateColorAsState(if (isPlaying) IndigoBg else BgCard, label = "bg")
+    val bgColor     by animateColorAsState(if (isPlaying) IndigoBg else BgCard, label = "bg")
     val borderWidth by animateDpAsState(if (isPlaying) 1.dp else 0.5.dp, label = "bw")
 
     Surface(
-        onClick = onTap,
+        onClick  = onTap,
         modifier = modifier,
-        shape = RoundedCornerShape(18.dp),
-        color = bgColor,
-        border = BorderStroke(borderWidth, borderColor)
+        shape    = RoundedCornerShape(18.dp),
+        color    = bgColor,
+        border   = BorderStroke(borderWidth, borderColor)
     ) {
         Box(Modifier.padding(14.dp).fillMaxWidth()) {
             Column {
                 Text(emoji, fontSize = 28.sp, modifier = Modifier.padding(bottom = 8.dp))
                 Text(name, style = MaterialTheme.typography.titleMedium, color = TextPrimary, maxLines = 1)
                 Spacer(Modifier.height(3.dp))
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Text(subLabel, style = MaterialTheme.typography.labelSmall, color = TextMuted)
-                    if (isDownloaded) Box(Modifier.size(5.dp).clip(CircleShape).background(GreenActive))
-                }
+                Text(subLabel, style = MaterialTheme.typography.labelSmall, color = TextMuted)
             }
             if (isPlaying) {
                 PlayingWaveIcon(modifier = Modifier.align(Alignment.TopEnd).size(26.dp))
             }
-            Text(
-                if (isFavorite) "♥" else "♡",
-                color = if (isFavorite) PinkLike else TextMuted,
-                fontSize = 14.sp,
-                modifier = Modifier.align(Alignment.BottomEnd).clickable { onFavoriteTap() }
-            )
         }
     }
 }
