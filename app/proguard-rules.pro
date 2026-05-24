@@ -1,21 +1,55 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ── Umumiy ───────────────────────────────────────────────────────────────────
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# ── Firebase ──────────────────────────────────────────────────────────────────
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.firebase.**
+-dontwarn com.google.android.gms.**
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# ── Firebase Realtime Database (SoundDto model) ───────────────────────────────
+-keep class com.naturalsound.data.model.** { *; }
+-keep class com.naturalsound.domain.model.** { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# ── Hilt ──────────────────────────────────────────────────────────────────────
+-keep class dagger.hilt.** { *; }
+-keep class javax.inject.** { *; }
+-keep @dagger.hilt.android.lifecycle.HiltViewModel class * { *; }
+-keepclasseswithmembers class * {
+    @javax.inject.Inject <init>(...);
+}
+
+# ── Kotlin Coroutines ─────────────────────────────────────────────────────────
+-keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
+-keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
+-dontwarn kotlinx.coroutines.**
+
+# ── Kotlin Serialization ──────────────────────────────────────────────────────
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
+
+# ── Jetpack Compose ───────────────────────────────────────────────────────────
+-keep class androidx.compose.** { *; }
+-dontwarn androidx.compose.**
+
+# ── Coil ──────────────────────────────────────────────────────────────────────
+-dontwarn coil.**
+
+# ── AndroidX Navigation ───────────────────────────────────────────────────────
+-keep class androidx.navigation.** { *; }
+
+# ── Enum lar ──────────────────────────────────────────────────────────────────
+-keepclassmembers enum * { *; }
+
+# ── Crash stack trace ─────────────────────────────────────────────────────────
+-keep public class * extends java.lang.Exception
+
+# ── Google AdMob / Native Ads ─────────────────────────────────────────────────
+# play-services-ads classes (com.google.android.gms.** already kept above,
+# but an explicit AdMob block documents intent and guards against future changes)
+-keep class com.google.android.gms.ads.** { *; }
+-keep class com.google.ads.** { *; }
+-dontwarn com.google.android.gms.ads.**
+# Keep the NativeAdManager and its ad layout view-binding helpers
+-keep class com.naturalsound.ads.** { *; }

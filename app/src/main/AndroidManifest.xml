@@ -20,6 +20,23 @@
         android:theme="@style/Theme.NaturalSound"
         tools:targetApi="31">
 
+        <!-- AdMob App ID -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-6710003016622154~9905497520" />
+
+        <!--
+            Manifest merger conflict fix:
+            play-services-measurement-api  → @xml/ga_ad_services_config
+            play-services-ads-lite         → @xml/gma_ad_services_config
+            tools:replace tells the merger to use AdMob's value and drop the conflict.
+        -->
+        <property
+            android:name="android.adservices.AD_SERVICES_CONFIG"
+            android:resource="@xml/gma_ad_services_config"
+            tools:replace="android:resource" />
+
+
         <activity
             android:name="com.naturalsound.ui.MainActivity"
             android:exported="true"

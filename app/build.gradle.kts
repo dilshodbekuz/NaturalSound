@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,34 +7,58 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.google.firebase.crashlytics)
     alias(libs.plugins.hilt.android)
+    alias(libs.plugins.ksp)
+}
 
-    kotlin("kapt")
+// ── Keystore properties ───────────────────────────────────────────────────────
+val keystorePropsFile = rootProject.file("keystore.properties")
+val keystoreProps = Properties().apply {
+    if (keystorePropsFile.exists()) load(keystorePropsFile.inputStream())
 }
 
 android {
-    namespace = "com.naturalsound"
+    namespace = "uz.apprica.naturalsound"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "uz.apprica.calmSounds"
+        applicationId = "uz.apprica.naturalsound"
         minSdk = 24
-        //noinspection OldTargetApi
-        targetSdk = 34
-        versionCode = 6
-        versionName = "2.0"
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // ── Signing ───────────────────────────────────────────────────────────────
+    signingConfigs {
+        create("release") {
+            val sf = keystoreProps.getProperty("storeFile")
+            if (!sf.isNullOrBlank()) {
+                storeFile     = file(sf)
+                storePassword = keystoreProps.getProperty("storePassword") ?: ""
+                keyAlias      = keystoreProps.getProperty("keyAlias")      ?: ""
+                keyPassword   = keystoreProps.getProperty("keyPassword")   ?: ""
+            }
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled   = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
+            isMinifyEnabled   = false
+            isShrinkResources = false
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -43,10 +69,16 @@ android {
     buildFeatures {
         compose = true
     }
+
+    // ── AAB optimizatsiya ─────────────────────────────────────────────────────
+    bundle {
+        language { enableSplit = true }
+        density  { enableSplit = true }
+        abi      { enableSplit = true }
+    }
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -71,7 +103,6 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.auth)
 
-    //Firebase crashlytics
     implementation(platform(libs.firebase.bom))
     implementation(libs.google.firebase.crashlytics)
     implementation(libs.firebase.analytics)
@@ -80,7 +111,10 @@ dependencies {
     implementation("com.google.firebase:firebase-database:21.0.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
 
-    implementation("com.google.dagger:hilt-android:2.50")
-    kapt("com.google.dagger:hilt-compiler:2.50")
+    implementation("com.google.dagger:hilt-android:2.53.1")
+    ksp("com.google.dagger:hilt-compiler:2.53.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    // ── Google AdMob ──────────────────────────────────────────────────────────
+    implementation("com.google.android.gms:play-services-ads:23.6.0")
 }

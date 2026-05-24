@@ -13,3 +13,9 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Keystore — hech qachon git ga yuklamang!
+keystore.properties
+/keystore/
+*.jks
+*.keystore

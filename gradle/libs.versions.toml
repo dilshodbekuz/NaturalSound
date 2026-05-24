@@ -1,5 +1,6 @@
 [versions]
 agp = "8.7.1"
+ksp = "2.0.0-1.0.21"
 coilCompose = "2.2.2"
 firebaseBom = "33.7.0"
 kotlin = "2.0.0"
@@ -56,4 +57,5 @@ google-gms-google-services = { id = "com.google.gms.google-services", version.re
 google-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "googleFirebaseCrashlytics" }
 jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
 hilt-android = { id = "com.google.dagger.hilt.android", version = "2.53.1" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 

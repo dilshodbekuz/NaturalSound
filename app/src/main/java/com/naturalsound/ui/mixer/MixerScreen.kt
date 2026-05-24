@@ -11,12 +11,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.naturalsound.ads.NativeAdCard
+import com.naturalsound.ads.NativeAdManager
 import com.naturalsound.domain.model.Sound
 import com.naturalsound.ui.theme.*
 
@@ -39,6 +42,13 @@ fun MixerScreen(
     LaunchedEffect(activeSoundIds, currentVolumes) {
         viewModel.syncActiveSounds(activeSoundIds, currentVolumes)
     }
+
+    // ── Native Ad ──────────────────────────────────────────────────────────────
+    val context = LocalContext.current
+    val adManager = remember { NativeAdManager(context) }
+    val nativeAd by adManager.nativeAd.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) { adManager.loadAd() }
+    DisposableEffect(Unit) { onDispose { adManager.destroyAd() } }
 
     Column(
         modifier = Modifier
@@ -119,6 +129,16 @@ fun MixerScreen(
             // ── Ovoz qo'shish tugmasi ─────────────────────────────────────────
             item {
                 AddSoundButton(onClick = onAddSound)
+            }
+
+            // ── Native reklama ────────────────────────────────────────────────
+            nativeAd?.let { ad ->
+                item {
+                    NativeAdCard(
+                        nativeAd = ad,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
 
             // ── Umumiy boshqaruv ──────────────────────────────────────────────

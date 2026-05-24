@@ -17,8 +17,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.naturalsound.ads.NativeAdCard
+import com.naturalsound.ads.NativeAdManager
 import com.naturalsound.domain.model.Sound
 import com.naturalsound.domain.model.SoundCategory
 import com.naturalsound.ui.components.*
@@ -38,6 +41,13 @@ fun HomeScreen(
     val c = LocalAppColors.current
 
     LaunchedEffect(activeSoundIds) { viewModel.updateActiveSounds(activeSoundIds) }
+
+    // ── Native Ad ──────────────────────────────────────────────────────────────
+    val context = LocalContext.current
+    val adManager = remember { NativeAdManager(context) }
+    val nativeAd by adManager.nativeAd.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) { adManager.loadAd() }
+    DisposableEffect(Unit) { onDispose { adManager.destroyAd() } }
 
     Scaffold(
         containerColor = c.bgDeep,
@@ -82,7 +92,29 @@ fun HomeScreen(
             if (uiState.isLoading) {
                 items(6, span = { GridItemSpan(1) }) { SoundCardSkeleton() }
             }
-            items(uiState.sounds, key = { it.id }, span = { GridItemSpan(1) }) { sound ->
+            // ── Birinchi 6 ta sound ──────────────────────────────────────────
+            items(uiState.sounds.take(6), key = { it.id }, span = { GridItemSpan(1) }) { sound ->
+                SoundCard(
+                    emoji     = sound.emoji,
+                    name      = sound.name,
+                    subLabel  = strings.categoryLabel(sound.category),
+                    isPlaying = sound.id in uiState.activeSoundIds,
+                    onTap     = { onToggleSound(sound) },
+                )
+            }
+            // ── Native reklama (6-sounddan keyin, to'liq kenglikda) ──────────
+            nativeAd?.let { ad ->
+                item(span = { GridItemSpan(2) }) {
+                    NativeAdCard(
+                        nativeAd = ad,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                    )
+                }
+            }
+            // ── Qolgan soundlar ──────────────────────────────────────────────
+            items(uiState.sounds.drop(6), key = { it.id }, span = { GridItemSpan(1) }) { sound ->
                 SoundCard(
                     emoji     = sound.emoji,
                     name      = sound.name,

@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -13,12 +14,16 @@ import androidx.compose.runtime.*
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.gms.ads.MobileAds
 import com.naturalsound.data.prefs.UserPreferences
 import com.naturalsound.domain.model.Sound
 import com.naturalsound.service.SoundPlayerService
 import com.naturalsound.ui.navigation.AppNavigation
 import com.naturalsound.ui.theme.NaturalSoundTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -56,6 +61,14 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Initialize AdMob SDK on a background thread so it never blocks the UI.
+        // The SDK is ready to serve ads once the callback fires.
+        CoroutineScope(Dispatchers.IO).launch {
+            MobileAds.initialize(this@MainActivity) { status ->
+                Log.d("AdMob", "MobileAds initialized: $status")
+            }
+        }
         Intent(this, SoundPlayerService::class.java).also {
             startForegroundService(it)
             bindService(it, conn, Context.BIND_AUTO_CREATE)
