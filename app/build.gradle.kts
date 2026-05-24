@@ -10,7 +10,7 @@ plugins {
 }
 
 android {
-    namespace = "uz.apprica.calmSounds"
+    namespace = "com.naturalsound"
     compileSdk = 35
 
     defaultConfig {

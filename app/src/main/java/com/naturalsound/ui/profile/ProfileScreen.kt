@@ -45,9 +45,9 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                 horizontalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 ProfileStat("%.1f".format(s.totalListenHours) + "s", "Tinglash")
-                Divider(modifier = Modifier.height(32.dp).width(0.5.dp), color = BgBorder)
+                VerticalDivider(modifier = Modifier.height(32.dp), thickness = 0.5.dp, color = BgBorder)
                 ProfileStat("${s.streakDays}", "Kunlik seriya 🔥")
-                Divider(modifier = Modifier.height(32.dp).width(0.5.dp), color = BgBorder)
+                VerticalDivider(modifier = Modifier.height(32.dp), thickness = 0.5.dp, color = BgBorder)
                 ProfileStat("${s.downloadedSounds.size}", "Offline")
             }
         }

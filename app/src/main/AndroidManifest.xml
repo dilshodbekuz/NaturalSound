@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
-        android:name=".db.Application"
+        android:name="com.naturalsound.NaturalSoundApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -19,6 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NaturalSound"
         tools:targetApi="31">
+
         <activity
             android:name="com.naturalsound.ui.MainActivity"
             android:exported="true"
@@ -27,18 +28,19 @@
             android:theme="@style/Theme.NaturalSound">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service
-            android:name=".service.MyForegroundService"
-            android:enabled="true"
-            android:exported="false" />
-    
-        <service android:name="com.naturalsound.service.SoundPlayerService" android:foregroundServiceType="mediaPlayback" android:exported="false" />
-        <receiver android:name="com.naturalsound.ui.timer.AlarmReceiver" android:exported="false" />
-    </application>
 
+        <service
+            android:name="com.naturalsound.service.SoundPlayerService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="false" />
+
+        <receiver
+            android:name="com.naturalsound.ui.timer.AlarmReceiver"
+            android:exported="false" />
+
+    </application>
 
 </manifest>

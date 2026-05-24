@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.naturalsound.domain.model.Sound
 import com.naturalsound.domain.repository.SoundRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -37,6 +38,7 @@ data class MixerUiState(
     val isAllPlaying: Boolean = true
 )
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class MixerViewModel @Inject constructor(
     private val soundRepository: SoundRepository

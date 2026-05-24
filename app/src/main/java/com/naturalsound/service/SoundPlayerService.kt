@@ -14,7 +14,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.naturalsound.ui.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
-import uz.apprica.calmSounds.R
+import com.naturalsound.R
 
 @AndroidEntryPoint
 class SoundPlayerService : Service() {
