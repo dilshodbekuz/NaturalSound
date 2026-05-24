@@ -33,6 +33,7 @@ fun MixerScreen(
     viewModel: MixerViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val c = LocalAppColors.current
     var showSaveDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(activeSoundIds, currentVolumes) {
@@ -42,13 +43,12 @@ fun MixerScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BgDeep)
+            .background(c.bgDeep)
     ) {
         // ── Top bar ──────────────────────────────────────────────────────────
         MixerTopBar(
-            activeCount = uiState.activeSounds.size,
-            isPlaying = uiState.isAllPlaying,
-            onSave = { showSaveDialog = true },
+            activeCount  = uiState.activeSounds.size,
+            isPlaying    = uiState.isAllPlaying,
             onTogglePlay = {
                 if (uiState.isAllPlaying) onPauseAll() else onResumeAll()
                 viewModel.toggleAllPlaying()
@@ -79,7 +79,7 @@ fun MixerScreen(
                     Text(
                         "AKTIV OVOZLAR",
                         fontSize = 11.sp, fontWeight = FontWeight.Medium,
-                        color = TextMuted, letterSpacing = 1.5.sp
+                        color = c.textMuted, letterSpacing = 1.5.sp
                     )
                     if (uiState.activeSounds.isNotEmpty()) {
                         Surface(shape = CircleShape, color = Indigo) {
@@ -154,10 +154,10 @@ fun MixerScreen(
 private fun MixerTopBar(
     activeCount: Int,
     isPlaying: Boolean,
-    onSave: () -> Unit,
     onTogglePlay: () -> Unit,
     onStopAll: () -> Unit
 ) {
+    val c = LocalAppColors.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -166,28 +166,30 @@ private fun MixerTopBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column {
-            Text("Mixer", style = MaterialTheme.typography.headlineMedium, color = TextPrimary)
+            Text("Mixer", style = MaterialTheme.typography.headlineMedium, color = c.textPrimary)
             Text(
                 if (activeCount == 0) "Hech narsa ijroetilmayapti"
                 else "$activeCount ta aktiv ovoz",
-                style = MaterialTheme.typography.bodyMedium, color = TextMuted
+                style = MaterialTheme.typography.bodyMedium, color = c.textMuted
             )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IconChip(emoji = "💾", onClick = onSave)
-            IconChip(emoji = if (isPlaying) "⏸" else "▶", onClick = onTogglePlay, tint = Indigo)
-            IconChip(emoji = "⏹", onClick = onStopAll, tint = MaterialTheme.colorScheme.error)
+        if (activeCount > 0) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                IconChip(emoji = if (isPlaying) "⏸" else "▶", onClick = onTogglePlay, tint = Indigo)
+                IconChip(emoji = "⏹", onClick = onStopAll, tint = MaterialTheme.colorScheme.error)
+            }
         }
     }
 }
 
 @Composable
-private fun IconChip(emoji: String, onClick: () -> Unit, tint: Color = BgBorder) {
+private fun IconChip(emoji: String, onClick: () -> Unit, tint: Color? = null) {
+    val c = LocalAppColors.current
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        color = BgCard,
-        border = BorderStroke(0.5.dp, tint.copy(alpha = 0.6f)),
+        color = c.bgCard,
+        border = BorderStroke(0.5.dp, (tint ?: c.bgBorder).copy(alpha = 0.6f)),
         modifier = Modifier.size(38.dp)
     ) {
         Box(contentAlignment = Alignment.Center) { Text(emoji, fontSize = 17.sp) }
@@ -202,19 +204,20 @@ private fun SceneSection(
     onSelect: (String) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        val c = LocalAppColors.current
         Text(
             "SAHNALAR",
             fontSize = 11.sp,
             fontWeight = FontWeight.Medium,
-            color = TextMuted,
+            color = c.textMuted,
             letterSpacing = 1.5.sp
         )
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items(scenes, key = { it.id }) { scene ->
                 val selected = scene.id == selectedScene
-                val bg by animateColorAsState(if (selected) IndigoBg else BgCard, label = "sc_bg")
+                val bg by animateColorAsState(if (selected) c.indigoBg else c.bgCard, label = "sc_bg")
                 val border by animateColorAsState(
-                    if (selected) Indigo else BgBorder,
+                    if (selected) Indigo else c.bgBorder,
                     label = "sc_bd"
                 )
                 Surface(
@@ -238,7 +241,7 @@ private fun SceneSection(
                         Text(
                             scene.name,
                             fontSize = 11.sp,
-                            color = if (selected) IndigoLight else TextMuted,
+                            color = if (selected) IndigoLight else c.textMuted,
                             fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
                             textAlign = TextAlign.Center,
                             maxLines = 1
@@ -262,12 +265,13 @@ private fun MixerSoundItem(
     onRemove: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val c = LocalAppColors.current
     var showEq by remember { mutableStateOf(false) }
 
     Surface(
         shape = RoundedCornerShape(18.dp),
-        color = BgCard,
-        border = BorderStroke(0.5.dp, BgBorder),
+        color = c.bgCard,
+        border = BorderStroke(0.5.dp, c.bgBorder),
         modifier = modifier.fillMaxWidth()
     ) {
         Column(
@@ -283,7 +287,7 @@ private fun MixerSoundItem(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(BgDeep),
+                        .background(c.bgDeep),
                     contentAlignment = Alignment.Center
                 ) { Text(sound.emoji, fontSize = 22.sp) }
 
@@ -291,12 +295,12 @@ private fun MixerSoundItem(
                     Text(
                         sound.name,
                         style = MaterialTheme.typography.titleMedium,
-                        color = TextPrimary
+                        color = c.textPrimary
                     )
                     Text(
                         sound.category.label,
                         style = MaterialTheme.typography.labelSmall,
-                        color = TextMuted
+                        color = c.textMuted
                     )
                 }
 
@@ -304,8 +308,8 @@ private fun MixerSoundItem(
                 Surface(
                     onClick = { showEq = !showEq },
                     shape = RoundedCornerShape(8.dp),
-                    color = if (showEq) IndigoBg else BgDeep,
-                    border = BorderStroke(0.5.dp, if (showEq) Indigo else BgBorder),
+                    color = if (showEq) c.indigoBg else c.bgDeep,
+                    border = BorderStroke(0.5.dp, if (showEq) Indigo else c.bgBorder),
                     modifier = Modifier.size(32.dp)
                 ) { Box(contentAlignment = Alignment.Center) { Text("🎚", fontSize = 14.sp) } }
 
@@ -313,15 +317,15 @@ private fun MixerSoundItem(
                 Surface(
                     onClick = onRemove,
                     shape = RoundedCornerShape(8.dp),
-                    color = BgDeep,
-                    border = BorderStroke(0.5.dp, BgBorder),
+                    color = c.bgDeep,
+                    border = BorderStroke(0.5.dp, c.bgBorder),
                     modifier = Modifier.size(32.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
                             "✕",
                             fontSize = 13.sp,
-                            color = TextMuted
+                            color = c.textMuted
                         )
                     }
                 }
@@ -336,7 +340,7 @@ private fun MixerSoundItem(
                     Text(
                         "Ovoz balandligi",
                         style = MaterialTheme.typography.labelSmall,
-                        color = TextMuted
+                        color = c.textMuted
                     )
                     Text(
                         "${(volume * 100).toInt()}%",
@@ -379,10 +383,11 @@ private fun MixerSoundItem(
 // ── EQ panel ──────────────────────────────────────────────────────────────────
 @Composable
 private fun EqPanel(eq: EqSettings, onBass: (Float) -> Unit, onTreble: (Float) -> Unit) {
+    val c = LocalAppColors.current
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = BgDeep,
-        border = BorderStroke(0.5.dp, BgBorder)
+        color = c.bgDeep,
+        border = BorderStroke(0.5.dp, c.bgBorder)
     ) {
         Column(
             modifier = Modifier
@@ -393,7 +398,7 @@ private fun EqPanel(eq: EqSettings, onBass: (Float) -> Unit, onTreble: (Float) -
             Text(
                 "EQ sozlamasi",
                 style = MaterialTheme.typography.labelMedium,
-                color = TextSecondary
+                color = c.textSecondary
             )
             EqRow(
                 label = "Bass",
@@ -426,10 +431,11 @@ private fun EqRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(emoji, fontSize = 14.sp, modifier = Modifier.width(20.dp))
+        val c = LocalAppColors.current
         Text(
             label,
             style = MaterialTheme.typography.labelSmall,
-            color = TextMuted,
+            color = c.textMuted,
             modifier = Modifier.width(44.dp)
         )
         MixSlider(
@@ -465,7 +471,7 @@ private fun MixSlider(
         colors = SliderDefaults.colors(
             thumbColor = activeColor,
             activeTrackColor = activeColor,
-            inactiveTrackColor = BgBorder
+            inactiveTrackColor = LocalAppColors.current.bgBorder
         ),
         thumb = {
             Box(
@@ -514,22 +520,23 @@ private fun EmptyMixer(onAddSound: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Text("🎛️", fontSize = 52.sp)
+        val c = LocalAppColors.current
         Text(
             "Hech narsa qo'shilmagan",
             style = MaterialTheme.typography.titleMedium,
-            color = TextSecondary
+            color = c.textSecondary
         )
         Text(
             "Home ekranda ovozni bosing",
             style = MaterialTheme.typography.bodyMedium,
-            color = TextMuted,
+            color = c.textMuted,
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(4.dp))
         Surface(
             onClick = onAddSound,
             shape = RoundedCornerShape(14.dp),
-            color = IndigoBg,
+            color = c.indigoBg,
             border = BorderStroke(1.dp, Indigo)
         ) {
             Text(
@@ -545,11 +552,12 @@ private fun EmptyMixer(onAddSound: () -> Unit) {
 // ── Ovoz qo'shish tugmasi ─────────────────────────────────────────────────────
 @Composable
 private fun AddSoundButton(onClick: () -> Unit) {
+    val c = LocalAppColors.current
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        color = BgCard,
-        border = BorderStroke(1.dp, BgBorder.copy(alpha = 0.6f)),
+        color = c.bgCard,
+        border = BorderStroke(1.dp, c.bgBorder.copy(alpha = 0.6f)),
         modifier = Modifier
             .fillMaxWidth()
             .height(52.dp)
@@ -576,10 +584,11 @@ private fun MasterControls(
     onResume: () -> Unit,
     onStop: () -> Unit
 ) {
+    val c = LocalAppColors.current
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = BgCard,
-        border = BorderStroke(0.5.dp, BgBorder)
+        color = c.bgCard,
+        border = BorderStroke(0.5.dp, c.bgBorder)
     ) {
         Row(
             modifier = Modifier
@@ -591,13 +600,13 @@ private fun MasterControls(
             Text(
                 "Boshqaruv",
                 style = MaterialTheme.typography.titleMedium,
-                color = TextSecondary,
+                color = c.textSecondary,
                 modifier = Modifier.weight(1f)
             )
             Surface(
                 onClick = if (isPlaying) onPause else onResume,
                 shape = RoundedCornerShape(12.dp),
-                color = IndigoBg,
+                color = c.indigoBg,
                 border = BorderStroke(0.5.dp, Indigo),
                 modifier = Modifier
                     .height(40.dp)
@@ -641,12 +650,13 @@ private fun SaveSceneDialog(onConfirm: (String, String) -> Unit, onDismiss: () -
     var emoji by remember { mutableStateOf("🎵") }
     val emojis = listOf("🎵", "🌙", "🎯", "🧘", "📖", "☀️", "🌧️", "🏔️", "🌊")
 
+    val c = LocalAppColors.current
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = BgCard,
+        containerColor = c.bgCard,
         tonalElevation = 0.dp,
         shape = RoundedCornerShape(20.dp),
-        title = { Text("Sahnani saqlash", color = TextPrimary, fontWeight = FontWeight.SemiBold) },
+        title = { Text("Sahnani saqlash", color = c.textPrimary, fontWeight = FontWeight.SemiBold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 // Emoji tanlash
@@ -655,10 +665,10 @@ private fun SaveSceneDialog(onConfirm: (String, String) -> Unit, onDismiss: () -
                         Surface(
                             onClick = { emoji = e },
                             shape = CircleShape,
-                            color = if (e == emoji) IndigoBg else BgDeep,
+                            color = if (e == emoji) c.indigoBg else c.bgDeep,
                             border = BorderStroke(
                                 if (e == emoji) 1.dp else 0.5.dp,
-                                if (e == emoji) Indigo else BgBorder
+                                if (e == emoji) Indigo else c.bgBorder
                             ),
                             modifier = Modifier.size(38.dp)
                         ) { Box(contentAlignment = Alignment.Center) { Text(e, fontSize = 18.sp) } }
@@ -668,13 +678,13 @@ private fun SaveSceneDialog(onConfirm: (String, String) -> Unit, onDismiss: () -
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    placeholder = { Text("Sahna nomi...", color = TextMuted) },
+                    placeholder = { Text("Sahna nomi...", color = c.textMuted) },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Indigo,
-                        unfocusedBorderColor = BgBorder,
-                        focusedTextColor = TextPrimary,
-                        unfocusedTextColor = TextPrimary
+                        unfocusedBorderColor = c.bgBorder,
+                        focusedTextColor = c.textPrimary,
+                        unfocusedTextColor = c.textPrimary
                     ),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -686,7 +696,7 @@ private fun SaveSceneDialog(onConfirm: (String, String) -> Unit, onDismiss: () -
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Bekor", color = TextMuted) }
+            TextButton(onClick = onDismiss) { Text("Bekor", color = c.textMuted) }
         }
     )
 }

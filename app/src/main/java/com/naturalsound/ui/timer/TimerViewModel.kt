@@ -1,70 +1,65 @@
 package com.naturalsound.ui.timer
 
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.naturalsound.data.prefs.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 data class TimerUiState(
+    // ── Uyqu taymeri ─────────────────────────────────────────────────────────
     val sleepTimerOn:    Boolean = false,
     val remainingMs:     Long    = 30 * 60 * 1000L,
     val selectedMinutes: Int     = 30,
-    val alarmEnabled:    Boolean = false,
-    val alarmHour:       Int     = 7,
-    val alarmMinute:     Int     = 0,
-    val fadeOutSeconds:  Int     = 60,
-    val todayMinutes:    Int     = 252,
-    val streakDays:      Int     = 12,
-    val offlineCount:    Int     = 7,
-    val favoriteCount:   Int     = 14
+    // ── Statistika ────────────────────────────────────────────────────────────
+    val todaySeconds:    Int     = 0,
+    val streakDays:      Int     = 0,
+    val todaySessions:   Int     = 0,
 )
 
 @HiltViewModel
 class TimerViewModel @Inject constructor(
-    @ApplicationContext private val context: Context
+    private val prefs: UserPreferences
 ) : ViewModel() {
+
+    // sdf init blokidan OLDIN e'lon qilinishi shart
+    private val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
     private val _state = MutableStateFlow(TimerUiState())
     val uiState: StateFlow<TimerUiState> = _state.asStateFlow()
 
     private var timerJob: Job? = null
+    private var statsJob: Job? = null
+    private var prevActiveCount = 0
+
+    init {
+        resetDailyIfNeeded()
+        syncStatsToState()
+    }
+
+    // ── Uyqu taymeri ─────────────────────────────────────────────────────────
 
     fun setTimer(minutes: Int) {
         _state.update { it.copy(selectedMinutes = minutes, remainingMs = minutes * 60_000L) }
         if (_state.value.sleepTimerOn) startCountdown()
     }
 
-    fun toggleSleepTimer() {
-        val nowOn = !_state.value.sleepTimerOn
-        _state.update { it.copy(sleepTimerOn = nowOn) }
-        if (nowOn) startCountdown() else stopCountdown()
+    fun startTimer() {
+        _state.update { it.copy(sleepTimerOn = true) }
+        startCountdown()
+    }
+
+    fun stopTimer() {
+        _state.update { it.copy(sleepTimerOn = false) }
+        stopCountdown()
     }
 
     fun addMinutes(minutes: Int) {
         _state.update { it.copy(remainingMs = it.remainingMs + minutes * 60_000L) }
-    }
-
-    fun setFadeOut(seconds: Int) {
-        _state.update { it.copy(fadeOutSeconds = seconds) }
-    }
-
-    fun toggleAlarm() {
-        val enabled = !_state.value.alarmEnabled
-        _state.update { it.copy(alarmEnabled = enabled) }
-        if (enabled) scheduleAlarm()
-        else cancelAlarm()
-    }
-
-    fun setAlarmTime(hour: Int, minute: Int) {
-        _state.update { it.copy(alarmHour = hour, alarmMinute = minute) }
-        if (_state.value.alarmEnabled) scheduleAlarm()
     }
 
     private fun startCountdown() {
@@ -76,7 +71,6 @@ class TimerViewModel @Inject constructor(
             }
             if (_state.value.remainingMs == 0L) {
                 _state.update { it.copy(sleepTimerOn = false) }
-                // Service ga stop signal → MainActivity orqali
             }
         }
     }
@@ -86,29 +80,80 @@ class TimerViewModel @Inject constructor(
         _state.update { it.copy(remainingMs = _state.value.selectedMinutes * 60_000L) }
     }
 
-    private fun scheduleAlarm() {
-        val alarmMgr = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent   = Intent(context, AlarmReceiver::class.java)
-        val pending  = PendingIntent.getBroadcast(
-            context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        val calendar = java.util.Calendar.getInstance().apply {
-            set(java.util.Calendar.HOUR_OF_DAY, _state.value.alarmHour)
-            set(java.util.Calendar.MINUTE, _state.value.alarmMinute)
-            set(java.util.Calendar.SECOND, 0)
-            if (before(java.util.Calendar.getInstance())) add(java.util.Calendar.DATE, 1)
+    // ── Statistika (activeCount HomeScreen/MainActivity dan keladi) ───────────
+
+    /** HomeScreen dan har rekompositsiyada chaqiriladi */
+    fun updateActiveCount(count: Int) {
+        if (prevActiveCount == 0 && count > 0) onSessionStart()
+        if (prevActiveCount > 0 && count == 0) stopStatsTracking()
+        prevActiveCount = count
+    }
+
+    private fun onSessionStart() {
+        resetDailyIfNeeded()
+        prefs.todaySessions = prefs.todaySessions + 1
+        updateStreak()
+        startStatsTracking()
+        syncStatsToState()
+    }
+
+    private fun startStatsTracking() {
+        statsJob?.cancel()
+        statsJob = viewModelScope.launch {
+            while (true) {
+                delay(1000)
+                prefs.todaySeconds = prefs.todaySeconds + 1
+                _state.update { it.copy(todaySeconds = prefs.todaySeconds) }
+            }
         }
-        alarmMgr.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pending)
     }
 
-    private fun cancelAlarm() {
-        val alarmMgr = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent   = Intent(context, AlarmReceiver::class.java)
-        val pending  = PendingIntent.getBroadcast(
-            context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        alarmMgr.cancel(pending)
+    private fun stopStatsTracking() {
+        statsJob?.cancel()
     }
 
-    override fun onCleared() { timerJob?.cancel(); super.onCleared() }
+    private fun updateStreak() {
+        val today = todayStr()
+        val last  = prefs.lastUsedDate
+        prefs.streakDays = when {
+            last == today     -> prefs.streakDays               // bugun allaqachon
+            last == yesterday() -> prefs.streakDays + 1         // kecha ishlatilgan
+            else              -> 1                              // bo'shliq — qayta boshlash
+        }
+        prefs.lastUsedDate = today
+    }
+
+    private fun resetDailyIfNeeded() {
+        val today = todayStr()
+        if (prefs.todayDate != today) {
+            prefs.todayDate    = today
+            prefs.todaySeconds = 0
+            prefs.todaySessions = 0
+        }
+    }
+
+    private fun syncStatsToState() {
+        _state.update {
+            it.copy(
+                todaySeconds  = prefs.todaySeconds,
+                streakDays    = prefs.streakDays,
+                todaySessions = prefs.todaySessions,
+            )
+        }
+    }
+
+    // ── Sana yordamchilari ────────────────────────────────────────────────────
+
+    private fun todayStr(): String = sdf.format(Date())
+
+    private fun yesterday(): String {
+        val cal = Calendar.getInstance().apply { add(Calendar.DATE, -1) }
+        return sdf.format(cal.time)
+    }
+
+    override fun onCleared() {
+        timerJob?.cancel()
+        statsJob?.cancel()
+        super.onCleared()
+    }
 }

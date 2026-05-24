@@ -3,7 +3,13 @@
     "allow": [
       "Bash(xargs cat)",
       "WebFetch(domain:naturalsound-df0da-default-rtdb.firebaseio.com)",
-      "PowerShell(Remove-Item *)"
+      "PowerShell(Remove-Item *)",
+      "Bash(ffmpeg -version)",
+      "PowerShell(cd C:\\\\Users\\\\xakim\\\\StudioProjects\\\\NaturalSound; Get-ChildItem \"app\\\\src\\\\main\\\\assets\\\\sounds\" | Select-Object Name, @{N=\"KB\";E={[math]::Round\\($_.Length/1KB,1\\)}} | Select-Object -First 5)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\xakim\\\\StudioProjects\\\\NaturalSound\\\\app\\\\src\\\\main\\\\java\\\\com\\\\naturalsound\\\\ui\\\\onboarding\\\\LanguageScreen.kt\" -ErrorAction SilentlyContinue)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\xakim\\\\StudioProjects\\\\NaturalSound\\\\app\\\\src\\\\main\\\\java\\\\com\\\\naturalsound\\\\ui\\\\onboarding\\\\NameScreen.kt\" -ErrorAction SilentlyContinue)",
+      "Bash(Write-Output \"Done\")",
+      "Bash(./gradlew :app:compileDebugKotlin)"
     ]
   }
 }

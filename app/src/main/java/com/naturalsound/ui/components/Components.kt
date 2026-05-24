@@ -21,6 +21,7 @@ import com.naturalsound.ui.theme.*
 // ── Servis pill ──────────────────────────────────────────────────────────────
 @Composable
 fun ServicePill(activeCount: Int) {
+    val strings = LocalStrings.current
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val alpha by infiniteTransition.animateFloat(
         initialValue = 1f, targetValue = 0.3f,
@@ -38,7 +39,7 @@ fun ServicePill(activeCount: Int) {
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Box(Modifier.size(6.dp).clip(CircleShape).background(GreenActive.copy(alpha = alpha)))
-            Text("$activeCount ta ovoz", color = GreenActive, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+            Text(strings.activeSounds(activeCount), color = GreenActive, fontSize = 11.sp, fontWeight = FontWeight.Medium)
         }
     }
 }
@@ -46,13 +47,14 @@ fun ServicePill(activeCount: Int) {
 // ── Kategoriya chip ──────────────────────────────────────────────────────────
 @Composable
 fun CategoryChip(label: String, emoji: String, selected: Boolean, onClick: () -> Unit) {
-    val bg by animateColorAsState(if (selected) Indigo else BgCard, label = "chip_bg")
-    val tc by animateColorAsState(if (selected) Color.White else TextMuted, label = "chip_tc")
+    val c = LocalAppColors.current
+    val bg by animateColorAsState(if (selected) Indigo else c.bgCard, label = "chip_bg")
+    val tc by animateColorAsState(if (selected) Color.White else c.textMuted, label = "chip_tc")
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         color = bg,
-        border = if (!selected) BorderStroke(0.5.dp, BgBorder) else null,
+        border = if (!selected) BorderStroke(0.5.dp, c.bgBorder) else null,
         modifier = Modifier.height(34.dp)
     ) {
         Row(
@@ -111,8 +113,9 @@ fun SoundCard(
     onTap: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val borderColor by animateColorAsState(if (isPlaying) Indigo else BgBorder, label = "bc")
-    val bgColor     by animateColorAsState(if (isPlaying) IndigoBg else BgCard, label = "bg")
+    val c = LocalAppColors.current
+    val borderColor by animateColorAsState(if (isPlaying) Indigo else c.bgBorder, label = "bc")
+    val bgColor     by animateColorAsState(if (isPlaying) c.indigoBg else c.bgCard, label = "bg")
     val borderWidth by animateDpAsState(if (isPlaying) 1.dp else 0.5.dp, label = "bw")
 
     Surface(
@@ -125,9 +128,9 @@ fun SoundCard(
         Box(Modifier.padding(14.dp).fillMaxWidth()) {
             Column {
                 Text(emoji, fontSize = 28.sp, modifier = Modifier.padding(bottom = 8.dp))
-                Text(name, style = MaterialTheme.typography.titleMedium, color = TextPrimary, maxLines = 1)
+                Text(name, style = MaterialTheme.typography.titleMedium, color = c.textPrimary, maxLines = 1)
                 Spacer(Modifier.height(3.dp))
-                Text(subLabel, style = MaterialTheme.typography.labelSmall, color = TextMuted)
+                Text(subLabel, style = MaterialTheme.typography.labelSmall, color = c.textMuted)
             }
             if (isPlaying) {
                 PlayingWaveIcon(modifier = Modifier.align(Alignment.TopEnd).size(26.dp))
@@ -145,8 +148,10 @@ fun MiniPlayer(
     onTogglePlay: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val strings = LocalStrings.current
+    val c = LocalAppColors.current
     if (activeCount == 0) return
-    Surface(modifier = modifier.fillMaxWidth(), color = BgCard, border = BorderStroke(0.5.dp, BgBorder)) {
+    Surface(modifier = modifier.fillMaxWidth(), color = c.bgCard, border = BorderStroke(0.5.dp, c.bgBorder)) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -154,8 +159,8 @@ fun MiniPlayer(
         ) {
             Text("🎛️", fontSize = 22.sp)
             Column(modifier = Modifier.weight(1f)) {
-                Text("$activeCount ta ovoz aralashmasi", style = MaterialTheme.typography.titleMedium, color = TextPrimary)
-                Text(soundNames.take(3).joinToString(" · "), style = MaterialTheme.typography.labelSmall, color = TextMuted, maxLines = 1)
+                Text(strings.soundMix(activeCount), style = MaterialTheme.typography.titleMedium, color = c.textPrimary)
+                Text(soundNames.take(3).joinToString(" · "), style = MaterialTheme.typography.labelSmall, color = c.textMuted, maxLines = 1)
             }
             Box(
                 modifier = Modifier.size(36.dp).clip(CircleShape).background(Indigo).clickable { onTogglePlay() },
@@ -168,18 +173,20 @@ fun MiniPlayer(
 // ── Search bar ────────────────────────────────────────────────────────────────
 @Composable
 fun NsSearchBar(query: String, onQuery: (String) -> Unit, modifier: Modifier = Modifier) {
-    Surface(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp), color = BgCard, border = BorderStroke(0.5.dp, BgBorder)) {
+    val strings = LocalStrings.current
+    val c = LocalAppColors.current
+    Surface(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp), color = c.bgCard, border = BorderStroke(0.5.dp, c.bgBorder)) {
         Row(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("🔍", fontSize = 15.sp)
             BasicTextField(
                 value = query, onValueChange = onQuery, singleLine = true, modifier = Modifier.weight(1f),
-                textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
+                textStyle = MaterialTheme.typography.bodyMedium.copy(color = c.textPrimary),
                 decorationBox = { inner ->
-                    if (query.isEmpty()) Text("Ovoz qidirish...", style = MaterialTheme.typography.bodyMedium, color = TextMuted)
+                    if (query.isEmpty()) Text(strings.searchHint, style = MaterialTheme.typography.bodyMedium, color = c.textMuted)
                     inner()
                 }
             )
-            if (query.isNotEmpty()) Text("✕", fontSize = 14.sp, color = TextMuted, modifier = Modifier.clickable { onQuery("") })
+            if (query.isNotEmpty()) Text("✕", fontSize = 14.sp, color = c.textMuted, modifier = Modifier.clickable { onQuery("") })
         }
     }
 }
@@ -187,8 +194,9 @@ fun NsSearchBar(query: String, onQuery: (String) -> Unit, modifier: Modifier = M
 // ── Section header ────────────────────────────────────────────────────────────
 @Composable
 fun SectionHeader(title: String, actionLabel: String? = null, onAction: (() -> Unit)? = null) {
+    val c = LocalAppColors.current
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-        Text(title, style = MaterialTheme.typography.titleLarge, color = TextPrimary)
+        Text(title, style = MaterialTheme.typography.titleLarge, color = c.textPrimary)
         if (actionLabel != null && onAction != null)
             Text(actionLabel, style = MaterialTheme.typography.labelMedium, color = Indigo, modifier = Modifier.clickable { onAction() })
     }

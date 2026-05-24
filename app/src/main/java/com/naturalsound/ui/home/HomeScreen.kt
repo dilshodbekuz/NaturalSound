@@ -34,19 +34,18 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val strings = LocalStrings.current
+    val c = LocalAppColors.current
 
-    // Service ID'larini VM ga uzatish
-    LaunchedEffect(activeSoundIds) {
-        viewModel.updateActiveSounds(activeSoundIds)
-    }
+    LaunchedEffect(activeSoundIds) { viewModel.updateActiveSounds(activeSoundIds) }
 
     Scaffold(
-        containerColor = BgDeep,
+        containerColor = c.bgDeep,
         bottomBar = {
             MiniPlayer(
-                activeCount = uiState.activeCount,
-                soundNames  = activeSoundNames,
-                isPlaying   = true,
+                activeCount  = uiState.activeCount,
+                soundNames   = activeSoundNames,
+                isPlaying    = true,
                 onTogglePlay = onPauseAll
             )
         }
@@ -58,43 +57,40 @@ fun HomeScreen(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
-            // Top bar
             item(span = { GridItemSpan(2) }) {
                 HomeTopBar(activeCount = uiState.activeCount, onMixerClick = onNavigateMixer)
             }
-            // Search
             item(span = { GridItemSpan(2) }) {
-                NsSearchBar(query = uiState.searchQuery, onQuery = viewModel::onSearch, modifier = Modifier.padding(top = 4.dp))
+                NsSearchBar(
+                    query = uiState.searchQuery,
+                    onQuery = viewModel::onSearch,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
-            // Kategoriyalar
             item(span = { GridItemSpan(2) }) {
                 CategoryRow(selected = uiState.selectedCategory, onSelect = viewModel::selectCategory)
             }
-            // Sarlavha
             item(span = { GridItemSpan(2) }) {
                 SectionHeader(
                     title = when {
-                        uiState.searchQuery.isNotBlank() -> "Natijalar (${uiState.sounds.size})"
-                        uiState.selectedCategory == SoundCategory.ALL -> "Mashhur ovozlar"
-                        else -> uiState.selectedCategory.label
+                        uiState.searchQuery.isNotBlank() -> strings.homeResults(uiState.sounds.size)
+                        uiState.selectedCategory == SoundCategory.ALL -> strings.homePopular
+                        else -> strings.categoryLabel(uiState.selectedCategory)
                     }
                 )
             }
-            // Skeleton
             if (uiState.isLoading) {
                 items(6, span = { GridItemSpan(1) }) { SoundCardSkeleton() }
             }
-            // Soundlar
             items(uiState.sounds, key = { it.id }, span = { GridItemSpan(1) }) { sound ->
                 SoundCard(
                     emoji     = sound.emoji,
                     name      = sound.name,
-                    subLabel  = sound.category.label,
+                    subLabel  = strings.categoryLabel(sound.category),
                     isPlaying = sound.id in uiState.activeSoundIds,
                     onTap     = { onToggleSound(sound) },
                 )
             }
-            // Error state
             uiState.error?.let { err ->
                 item(span = { GridItemSpan(2) }) {
                     Text(
@@ -105,7 +101,6 @@ fun HomeScreen(
                     )
                 }
             }
-            // Empty state
             if (!uiState.isLoading && uiState.sounds.isEmpty() && uiState.error == null) {
                 item(span = { GridItemSpan(2) }) { EmptyState(uiState.searchQuery) }
             }
@@ -115,14 +110,16 @@ fun HomeScreen(
 
 @Composable
 private fun HomeTopBar(activeCount: Int, onMixerClick: () -> Unit) {
+    val strings = LocalStrings.current
     Row(
         modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column {
-            Text("Xush kelibsiz,", style = MaterialTheme.typography.labelMedium, color = TextMuted)
-            Text("NaturalSound 🌿", style = MaterialTheme.typography.headlineMedium, color = TextPrimary)
+            val c2 = LocalAppColors.current
+        Text(strings.homeGreeting, style = MaterialTheme.typography.labelMedium, color = c2.textMuted)
+            Text("NaturalSound 🌿", style = MaterialTheme.typography.headlineMedium, color = c2.textPrimary)
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (activeCount > 0) ServicePill(activeCount = activeCount)
@@ -136,9 +133,15 @@ private fun HomeTopBar(activeCount: Int, onMixerClick: () -> Unit) {
 
 @Composable
 private fun CategoryRow(selected: SoundCategory, onSelect: (SoundCategory) -> Unit) {
+    val strings = LocalStrings.current
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(vertical = 4.dp)) {
         items(SoundCategory.entries) { cat ->
-            CategoryChip(label = cat.label, emoji = cat.emoji, selected = cat == selected, onClick = { onSelect(cat) })
+            CategoryChip(
+                label    = strings.categoryLabel(cat),
+                emoji    = cat.emoji,
+                selected = cat == selected,
+                onClick  = { onSelect(cat) }
+            )
         }
     }
 }
@@ -150,24 +153,29 @@ private fun SoundCardSkeleton() {
         initialValue = 0.3f, targetValue = 0.6f,
         animationSpec = infiniteRepeatable(tween(800), RepeatMode.Reverse), label = "a"
     )
+    val c = LocalAppColors.current
     Surface(
         shape = RoundedCornerShape(18.dp),
-        color = BgCard.copy(alpha = alpha),
-        border = BorderStroke(0.5.dp, BgBorder),
+        color = c.bgCard.copy(alpha = alpha),
+        border = BorderStroke(0.5.dp, c.bgBorder),
         modifier = Modifier.fillMaxWidth().height(120.dp)
     ) {}
 }
 
 @Composable
 private fun EmptyState(query: String) {
+    val strings = LocalStrings.current
     Column(
         modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text("🔇", fontSize = 48.sp)
-        Text(if (query.isNotBlank()) "«$query» topilmadi" else "Ovozlar yo'q", style = MaterialTheme.typography.titleMedium, color = TextSecondary)
-        Text("Firebase'dan yuklanmoqda...", style = MaterialTheme.typography.bodyMedium, color = TextMuted)
+        val c = LocalAppColors.current
+        Text(
+            if (query.isNotBlank()) strings.homeNotFound(query) else strings.homeEmpty,
+            style = MaterialTheme.typography.titleMedium, color = c.textSecondary
+        )
+        Text(strings.homeLoading, style = MaterialTheme.typography.bodyMedium, color = c.textMuted)
     }
 }
-

@@ -11,14 +11,20 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.*
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.naturalsound.data.prefs.UserPreferences
 import com.naturalsound.domain.model.Sound
 import com.naturalsound.service.SoundPlayerService
 import com.naturalsound.ui.navigation.AppNavigation
 import com.naturalsound.ui.theme.NaturalSoundTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var prefs: UserPreferences
 
     private var svc: SoundPlayerService? = null
     private var isBound = false
@@ -55,7 +61,9 @@ class MainActivity : ComponentActivity() {
             bindService(it, conn, Context.BIND_AUTO_CREATE)
         }
         setContent {
-            NaturalSoundTheme {
+            val appVm: AppViewModel = viewModel()
+            val theme by appVm.theme.collectAsStateWithLifecycle()
+            NaturalSoundTheme(darkTheme = theme != "light") {
                 val ids     by _activeIds
                 val names   by _activeNames
                 val volumes by _volumes
