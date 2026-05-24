@@ -39,17 +39,6 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
             Text("Xakimov", style = MaterialTheme.typography.titleLarge, color = TextPrimary)
             Text("Premium foydalanuvchi", style = MaterialTheme.typography.bodyMedium, color = TextMuted)
 
-            // Statistika qatori
-            Row(
-                modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                ProfileStat("%.1f".format(s.totalListenHours) + "s", "Tinglash")
-                VerticalDivider(modifier = Modifier.height(32.dp), thickness = 0.5.dp, color = BgBorder)
-                ProfileStat("${s.streakDays}", "Kunlik seriya 🔥")
-                VerticalDivider(modifier = Modifier.height(32.dp), thickness = 0.5.dp, color = BgBorder)
-                ProfileStat("${s.downloadedSounds.size}", "Offline")
-            }
         }
 
         // ── Sozlamalar ────────────────────────────────────────────────────────
@@ -96,26 +85,6 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
                 }
             }
 
-            // ── Offline fayllar ───────────────────────────────────────────────
-            if (s.downloadedSounds.isNotEmpty()) {
-                SettingsSection("OFFLINE FAYLLAR (${s.downloadedSounds.size})") {
-                    s.downloadedSounds.forEach { sound ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Text(sound.emoji, fontSize = 20.sp)
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(sound.name, style = MaterialTheme.typography.bodyMedium, color = TextPrimary)
-                                Text("Offline · MP3", style = MaterialTheme.typography.labelSmall, color = GreenActive)
-                            }
-                            Text("🗑", fontSize = 16.sp, color = TextMuted)
-                        }
-                        if (sound != s.downloadedSounds.last()) SettingDivider()
-                    }
-                }
-            }
 
             // ── Boshqa havolalar ──────────────────────────────────────────────
             SettingsSection("BOSHQA") {

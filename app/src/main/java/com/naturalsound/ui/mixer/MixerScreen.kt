@@ -350,10 +350,7 @@ private fun MixerSoundItem(
 
             // ── Teglar ────────────────────────────────────────────────────────
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                SoundTag(
-                    text = if (sound.isDownloaded) "Offline" else "Online",
-                    color = if (sound.isDownloaded) GreenActive else TextMuted
-                )
+                SoundTag(text = "Online", color = TextMuted)
                 SoundTag(text = "Loop", color = TextMuted)
                 if (showEq && (eq.bass != 0f || eq.treble != 0f)) {
                     if (eq.bass != 0f) SoundTag(
