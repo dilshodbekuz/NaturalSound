@@ -1,13 +1,14 @@
 {
   "project_info": {
-    "project_number": "783841602838",
-    "project_id": "calmsounds-2f66a",
-    "storage_bucket": "calmsounds-2f66a.firebasestorage.app"
+    "project_number": "1074143865764",
+    "firebase_url": "https://naturalsound-df0da-default-rtdb.firebaseio.com",
+    "project_id": "naturalsound-df0da",
+    "storage_bucket": "naturalsound-df0da.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:783841602838:android:b0f5d5a36bf3115829f437",
+        "mobilesdk_app_id": "1:1074143865764:android:f84c2df1375b448c0f6f31",
         "android_client_info": {
           "package_name": "uz.apprica.calmSounds"
         }
@@ -15,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCZRZupOiNX125zC4KK0PTr4NnqSDGN3ow"
+          "current_key": "AIzaSyAphbYJoEu0VfYvoL2i5-ms3EkocX7lu94"
         }
       ],
       "services": {
