@@ -48,7 +48,9 @@ android {
 dependencies {
 
     implementation(libs.androidx.core.ktx)
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
@@ -75,7 +77,8 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.coil.compose)
     implementation(libs.kotlinx.collections.immutable)
-    implementation ("com.google.firebase:firebase-database:21.0.0")
+    implementation("com.google.firebase:firebase-database:21.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
 
     implementation ("androidx.room:room-runtime:2.6.1")
     kapt ("androidx.room:room-compiler:2.6.1")

@@ -1,9 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:name=".db.Application"
@@ -17,7 +20,7 @@
         android:theme="@style/Theme.NaturalSound"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name="com.naturalsound.ui.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:launchMode="singleInstance"
@@ -32,6 +35,9 @@
             android:name=".service.MyForegroundService"
             android:enabled="true"
             android:exported="false" />
+    
+        <service android:name="com.naturalsound.service.SoundPlayerService" android:foregroundServiceType="mediaPlayback" android:exported="false" />
+        <receiver android:name="com.naturalsound.ui.timer.AlarmReceiver" android:exported="false" />
     </application>
 
 
