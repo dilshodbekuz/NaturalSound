@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.*
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
 
 data class TimerUiState(
     // ── Uyqu taymeri ─────────────────────────────────────────────────────────
@@ -31,6 +32,9 @@ class TimerViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(TimerUiState())
     val uiState: StateFlow<TimerUiState> = _state.asStateFlow()
+
+    private val _timerExpired = Channel<Unit>(Channel.CONFLATED)
+    val timerExpired: Flow<Unit> = _timerExpired.receiveAsFlow()
 
     private var timerJob: Job? = null
     private var statsJob: Job? = null
@@ -71,6 +75,7 @@ class TimerViewModel @Inject constructor(
             }
             if (_state.value.remainingMs == 0L) {
                 _state.update { it.copy(sleepTimerOn = false) }
+                _timerExpired.trySend(Unit)
             }
         }
     }
@@ -154,6 +159,7 @@ class TimerViewModel @Inject constructor(
     override fun onCleared() {
         timerJob?.cancel()
         statsJob?.cancel()
+        _timerExpired.close()
         super.onCleared()
     }
 }

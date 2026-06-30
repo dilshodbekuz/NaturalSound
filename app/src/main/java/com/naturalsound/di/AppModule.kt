@@ -1,5 +1,6 @@
 package com.naturalsound.di
 
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.naturalsound.data.repository.SoundRepositoryImpl
 import com.naturalsound.domain.repository.SoundRepository
@@ -18,6 +19,9 @@ object DatabaseModule {
     fun provideFirebaseDatabase(): FirebaseDatabase =
         FirebaseDatabase.getInstance("https://naturalsound-df0da-default-rtdb.firebaseio.com")
             .also { it.setPersistenceEnabled(true) }
+
+    @Provides @Singleton
+    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
 }
 
 @Module

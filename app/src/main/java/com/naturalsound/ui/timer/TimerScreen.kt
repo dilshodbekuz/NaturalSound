@@ -29,8 +29,8 @@ fun TimerScreen(
     val strings = LocalStrings.current
     val c = LocalAppColors.current
 
-    // Aktiv ovozlar sonini ViewModel ga uzatamiz (statistika uchun)
     LaunchedEffect(activeCount) { viewModel.updateActiveCount(activeCount) }
+    LaunchedEffect(Unit) { viewModel.timerExpired.collect { onFadeOutAndStop() } }
 
     Column(
         modifier = Modifier

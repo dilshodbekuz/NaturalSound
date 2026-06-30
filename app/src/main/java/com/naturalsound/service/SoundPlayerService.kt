@@ -34,6 +34,7 @@ class SoundPlayerService : Service() {
     private val binder = SoundBinder()
     private val players = mutableMapOf<String, MediaPlayer>()
     private val volumes = mutableMapOf<String, Float>()
+    private val soundIdToName = mutableMapOf<String, String>()
     var activeSoundNames = mutableListOf<String>()
         private set
     var onStateChanged: (() -> Unit)? = null
@@ -103,6 +104,7 @@ class SoundPlayerService : Service() {
         }
         players[soundId] = player
         volumes[soundId] = volume
+        soundIdToName[soundId] = soundName
         if (!activeSoundNames.contains(soundName)) activeSoundNames.add(soundName)
         updateNotification()
         onStateChanged?.invoke()
@@ -112,6 +114,7 @@ class SoundPlayerService : Service() {
         players[soundId]?.apply { stop(); release() }
         players.remove(soundId)
         volumes.remove(soundId)
+        soundIdToName.remove(soundId)?.let { activeSoundNames.remove(it) }
         onStateChanged?.invoke()
         if (players.isEmpty()) {
             activeSoundNames.clear()
@@ -135,6 +138,7 @@ class SoundPlayerService : Service() {
         players.values.forEach { it.stop(); it.release() }
         players.clear()
         volumes.clear()
+        soundIdToName.clear()
         activeSoundNames.clear()
         onStateChanged?.invoke()
         stopForeground(STOP_FOREGROUND_DETACH)
@@ -212,8 +216,6 @@ class SoundPlayerService : Service() {
 
     private fun updateNotification() {
         if (players.isEmpty()) return
-        val nm = getSystemService(NotificationManager::class.java)
-        nm.notify(NOTIFICATION_ID, buildNotification())
         startForeground(NOTIFICATION_ID, buildNotification())
     }
 
